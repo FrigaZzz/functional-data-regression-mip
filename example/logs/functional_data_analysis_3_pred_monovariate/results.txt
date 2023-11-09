@@ -1,0 +1,72 @@
+Set parameter Username
+Academic license - for non-commercial use only - expires 2024-10-22
+Set parameter TimeLimit to value 60
+Set parameter Presolve to value 2
+Set parameter Heuristics to value 0.5
+Set parameter MIPGap to value 0.05
+Set parameter Threads to value 1
+Set parameter MIPFocus to value 1
+Set parameter NumericFocus to value 1
+Set parameter NonConvex to value 2
+Set parameter OptimalityTol to value 0.01
+Set parameter IntFeasTol to value 1e-06
+Set parameter Threads to value 1
+Set parameter TimeLimit to value 60
+Set parameter NumericFocus to value 1
+Set parameter MIPFocus to value 1
+Set parameter Heuristics to value 0.5
+Set parameter MIPGap to value 0.05
+Set parameter OptimalityTol to value 0.01
+Set parameter IntFeasTol to value 1e-06
+Set parameter NonConvex to value 2
+Set parameter Presolve to value 2
+Gurobi Optimizer version 10.0.3 build v10.0.3rc0 (win64)
+
+CPU model: AMD Ryzen 7 5800H with Radeon Graphics, instruction set [SSE2|AVX|AVX2]
+Thread count: 8 physical cores, 16 logical processors, using up to 1 threads
+
+Optimize a model with 49 rows, 33 columns and 111 nonzeros
+Model fingerprint: 0xb56c6c0c
+Model has 120 quadratic objective terms
+Variable types: 15 continuous, 18 integer (18 binary)
+Coefficient statistics:
+  Matrix range     [1e+00, 1e+03]
+  Objective range  [1e-01, 7e+07]
+  QObjective range [7e+00, 3e+07]
+  Bounds range     [0e+00, 0e+00]
+  RHS range        [3e+00, 3e+00]
+Found heuristic solution: objective 1.627568e+08
+Presolve removed 4 rows and 0 columns
+Presolve time: 0.00s
+Presolved: 57 rows, 37 columns, 114 nonzeros
+Presolved model has 124 quadratic objective terms
+Variable types: 19 continuous, 18 integer (18 binary)
+Root relaxation presolved: 57 rows, 37 columns, 114 nonzeros
+Root relaxation presolved model has 124 quadratic objective terms
+
+
+Root relaxation: objective 1.183312e+02, 137 iterations, 0.00 seconds (0.00 work units)
+
+    Nodes    |    Current Node    |     Objective Bounds      |     Work
+ Expl Unexpl |  Obj  Depth IntInf | Incumbent    BestBd   Gap | It/Node Time
+
+     0     0  118.33121    0   18 1.6276e+08  118.33121   100%     -    0s
+H    0     0                     149.7689829  118.33121  21.0%     -    0s
+     0     0  138.96943    0    9  149.76898  138.96943  7.21%     -    0s
+     0     0  138.96943    0    9  149.76898  138.96943  7.21%     -    0s
+     0     0  139.24108    0    9  149.76898  139.24108  7.03%     -    0s
+     0     0  139.24108    0    9  149.76898  139.24108  7.03%     -    0s
+H    0     0                     140.0876705  139.24108  0.60%     -    0s
+
+Cutting planes:
+  Implied bound: 4
+
+Explored 1 nodes (253 simplex iterations) in 0.01 seconds (0.01 work units)
+Thread count was 1 (of 16 available processors)
+
+Solution count 3: 140.088 149.769 1.62757e+08 
+
+Optimal solution found (tolerance 5.00e-02)
+Best objective 1.400876705348e+02, best bound 1.392410843074e+02, gap 0.6043%
+
+User-callback calls 278, time in user-callback 0.00 sec
