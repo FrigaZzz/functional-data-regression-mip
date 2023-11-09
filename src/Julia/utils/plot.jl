@@ -14,8 +14,8 @@ function plot_combined_predicted_curve(γ_matrix, γ_star, basis_values, m, r, t
         combined_curve_star = basis_values * γ_star[j, :]
         
         # Plot the combined predicted curve for γ_matrix and γ_star
-        plot!(t_vals, combined_curve_matrix, label="γ_matrix", color=:blue)
-        plot!(t_vals, combined_curve_star, label="γ_predicted", color=:red, linestyle=:dash)
+        plot!(p,t_vals, combined_curve_matrix, label="γ_matrix", color=:blue)
+        plot!(p,t_vals, combined_curve_star, label="γ_predicted", color=:red, linestyle=:dash)
         
         # Save the plot to a file
         savefig(p, joinpath(folder_path, "predictor$(j)_combined_predicted_curve.png"))

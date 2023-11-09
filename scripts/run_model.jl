@@ -183,6 +183,11 @@ end
 # Function to generate and save plots
 function generate_and_save_plots(Y, Y_pred, beta_matrix, beta_star, basis_values, n, p, r, tb)
     
+ 
+
+    # Plot combined predicted curve
+    plot_combined_predicted_curve(beta_matrix, beta_star, basis_values, p, r, tb, joinpath(project_root,"outputs", "plots", simulation_name))
+
     p1 = scatter(Y, Y_pred, xlabel="True Y", ylabel="Predicted Y", legend=false, title="True vs Predicted Y")
     # plot the Y as red line over the predicted Y
     plot!(p1,Y, Y, color=:red)  # A y=x line for reference
@@ -192,9 +197,6 @@ function generate_and_save_plots(Y, Y_pred, beta_matrix, beta_star, basis_values
     p2 = scatter(1:n, residuals, xlabel="Observation", ylabel="Residual", legend=false, title="Residuals")
     hline!(p2, [0], color=:red, label="Zero line")
     save_plot(p2, "residuals")
-
-    # Plot combined predicted curve
-    plot_combined_predicted_curve(beta_matrix, beta_star, basis_values, p, r, tb, joinpath(project_root,"outputs", "plots", simulation_name))
 end
 
 
