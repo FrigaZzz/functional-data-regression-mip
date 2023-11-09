@@ -47,7 +47,7 @@ Each script will automate the setup of the project environment by installing the
 
 You can also proceed with the manual configuration.
 
-## R - Manual Project Environment Setup 
+## Julia - Manual Project Environment Setup 
 
 
 To set up the project environment and install the necessary dependencies, follow these steps:
@@ -76,7 +76,10 @@ After completing these steps, you will have all the necessary packages installed
 ---
 
 
-## Julia - Manual Project Environment Setup 
+## R - Manual Project Environment Setup 
+
+You can either decide to install the required dependencies that are defined in the DESCRIPTION file or reproduce the whole environment, by 
+installing the RENV ENVIRONMENT.
 
 1. **Open R**: Navigate to the project directory and open R.
 
