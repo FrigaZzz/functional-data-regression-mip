@@ -1,11 +1,42 @@
-# functional-data-regression-mip
+# Functional Data Regression with MIP
 This repository presents an innovative approach to scalar-on-function linear regression analysis using a Mixed Integer Programming (MIP) solver. The method provided here addresses the challenges of functional data analysis (FDA), where the predictors are curves, images, or shapes that vary over a continuum such as time, space, or wavelength.
 
 
 
+## Repository Structure
+
+- `setup/`: Scripts and instructions for setting up the necessary environment to run the models. Follow the setup guide before proceeding with the analysis.
+- `notebooks/`: A Jupyter notebook `scalar_on_function.ipynb` is provided here to demonstrate the project's functionality.
+- `simulations/`: Contains R scripts that are used to generate input data for the regression models, essential for creating datasets for analysis.
+- `src/`: The source code is divided into Julia and R code:
+  - `Julia/models/`: Julia implementation of the MIP models using Gurobi, forming the core of the regression analysis.
+  - `Julia/utils/`: Utility scripts in Julia for supporting model execution, including data manipulation and result processing.
+  - `R/`: Holds R scripts for data simulation and utility functions that complement the Julia models.
+    - `data_simulator/`: R scripts for simulating datasets to be used in the models.
+    - `utils/`: R utility scripts such as `basis_utilities.R`, `covariance_utilities.R`, and others for tasks like plotting and model setup.
+- `outputs/`: Outputs from the model runs, including:
+  - `logs/`: Textual outputs like performance metrics and execution logs.
+  - `plots/`: Visual outputs such as graphs and charts that illustrate the results.
+
+## Getting Started
+
+1. Begin by setting up the environment using the provided scripts in the `setup/` directory.
+2. Explore the `notebooks/` directory to understand the practical application of the models through the `scalar_on_function.ipynb` notebook.
+3. Examine the `simulations/` folder to learn about the generation of input data for the regression analysis.
+4. Review the `src/` directory for the actual model implementations in Julia and supplementary R scripts.
+5. Run the models and simulations, and then analyze the outputs in the `outputs/` directory to assess the models' performance.
+
+## Outputs
+
+The outputs of the analyses are categorized as follows:
+
+- `logs/`: Includes CSV files detailing errors, performance metrics, and result summaries.
+- `plots/`: Contains PNG images that provide visual interpretations of the results, such as predicted curves and residuals.
+
+
 
 ---
-## **Automatic Environment Setups **
+##  Environment Setups
 
 I have created two scripts for you: one for R using `renv` and one for Julia using the standard package manager.
 
@@ -74,6 +105,5 @@ After completing these steps, you will have all the necessary packages installed
     ```
 
     If they load without error, it means the restoration process has been successful and the packages are installed.
-
-Remember, `renv::restore()` will install the packages into the project-specific `renv` library, not the system-wide R library. Ensure that your R session is using the correct `renv` environment by checking with `renv::paths$library()`. This ensures that when you call `library(packageName)`, it's loading the package from the project's `renv` library.
+    Remember, `renv::restore()` will install the packages into the project-specific `renv` library, not the system-wide R library. Ensure that your R session is using the correct `renv` environment by checking with `renv::paths$library()`. This ensures that when you call `library(packageName)`, it's loading the package from the project's `renv` library.
 ---
