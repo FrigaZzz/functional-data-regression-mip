@@ -21,7 +21,8 @@ renv/*
 
 # Jupyter Notebooks
 .ipynb_checkpoints/
-*.ipynb
+
+
 # Gurobi
 *.lp
 *.rlp
