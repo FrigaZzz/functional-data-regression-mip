@@ -119,6 +119,77 @@ function get_predictions(X_coeff, gamma_star, alpha_star)
     return predictions
 end
 
+using Statistics
+
+# RMSE
+function calculate_rmse(Y_true, Y_pred)
+    n = length(Y_true)
+    return sqrt(sum((Y_true[i] - Y_pred[i])^2 for i in 1:n) / n)
+end
+
+# MAE
+function calculate_mae(Y_true, Y_pred)
+    n = length(Y_true)
+    mae = sum(abs(Y_true[i] - Y_pred[i]) for i in 1:n) / n
+    return  mae
+end
+
+# MSE
+function calculate_mse(Y_true, Y_pred)
+    n = length(Y_true)
+    mse = sum((Y_true[i] - Y_pred[i])^2 for i in 1:n) / n
+    return  mse
+end
+
+
+# MAPE
+function calculate_mape(Y_true, Y_pred)
+    n = length(Y_true)
+    return 100 * sum(abs((Y_true[i] - Y_pred[i]) / Y_true[i]) for i in 1:n if Y_true[i] != 0) / n
+end
+
+# MAD
+function calculate_mad(Y_true, Y_pred)
+    return median(abs.(Y_true - Y_pred))
+end
+
+# Adjusted R^2
+function calculate_adjusted_r2(Y_true, Y_pred, p)
+    n = length(Y_true)
+    mse = sum((Y_true[i] - Y_pred[i])^2 for i in 1:n) / n
+    var_y_true = var(Y_true)
+    r2 = 1 - mse / var_y_true
+    return 1 - (1 - r2) * (n - 1) / (n - p - 1)
+end
+
+# NRMSE
+function calculate_nrmse(Y_true, Y_pred)
+    rmse = calculate_rmse(Y_true, Y_pred)
+    return rmse / (maximum(Y_true) - minimum(Y_true))
+end
+
+# ABC
+function calculate_abc(Y_true, Y_pred)
+    return sum(abs.(Y_true - Y_pred))
+end
+
+
+# Add a qualitative valuation
+function valuate_metric(metric_value, good_threshold, excellent_threshold=nothing)
+    if isnothing(excellent_threshold)
+        return metric_value < good_threshold ? "Good" : "Poor"
+    else
+        if metric_value < excellent_threshold
+            return "Excellent"
+        elseif metric_value < good_threshold
+            return "Good"
+        else
+            return "Poor"
+        end
+    end
+end
+
+
 # Function to process results and generate plots
 function process_and_plot(Y, Z, alpha_star, beta_matrix, beta_star, basis_values, n, p, r, tb)
     # Compute and display DataFrame
@@ -128,13 +199,41 @@ function process_and_plot(Y, Z, alpha_star, beta_matrix, beta_star, basis_values
     df_file_path = joinpath(project_root, "outputs", "logs", simulation_name, "error_df.csv")
     CSV.write(df_file_path, df)
 
-    # Compute evaluation metrics
-    mse, rmse, mae, relative_error = compute_evaluation_metrics(beta_matrix, beta_star)
+    
+    # Get predictions
+    Y_pred = get_predictions(Z, beta_star, alpha_star)
+    
+    
+    
+    # Evaluate the model using new metrics
+    rmse = calculate_rmse(Y, Y_pred)
+    mape = calculate_mape(Y, Y_pred)
+    mae = calculate_mae(Y, Y_pred)
+    mse = calculate_mse(Y, Y_pred)
+    mad = calculate_mad(Y, Y_pred)
+    adjusted_r2 = calculate_adjusted_r2(Y, Y_pred, p)
+    nrmse = calculate_nrmse(Y, Y_pred)
+    abc = calculate_abc(Y, Y_pred)
+    
+    # Valuation of metrics
+    println("MSE: $mse, MAE: $mae")
+    println("RMSE: $rmse (Lower is better. Below 0.1 is excellent, but depends on data scale.)")
+    println("MAPE: $mape% (Lower is better. Typically < 10% is good.)")
+    println("MAD: $mad (Lower is better. Less sensitive to outliers than RMSE.)")
+    println("Adjusted R2: $adjusted_r2 (Higher is better. Closer to 1 indicates a better fit.)")
+    println("NRMSE: $nrmse (Lower is better. Below 0.1 is excellent, but depends on data scale.)")
+    println("ABC: $abc (Lower is better. No standard threshold; context-dependent.)")
+    
+
+    # Example of using the valuation function
+    rmse_valuation = valuate_metric(rmse, 0.2, 0.1)
+    println("RMSE Valuation: $rmse_valuation")
+    
 
     # Save performance metrics to a text file
     performance_file_path = joinpath(project_root, "outputs", "logs", simulation_name, "performance.txt")
     open(performance_file_path, "w") do io
-        write(io, "mse: $mse\nrmse: $rmse\nmae: $mae\nrelative_error: $relative_error\n")
+        write(io, "mse: $mse\nrmse: $rmse\nmae: $mae\nmape: $mape%\nmad: $mad\nadjusted_r2: $adjusted_r2\nnrmse: $nrmse\nabc: $abc\n")
     end
 
     Y_pred = get_predictions( Z, beta_star, alpha_star)
@@ -163,19 +262,6 @@ function compute_dataframe(beta_matrix, beta_star, p)
     end
 
     return df
-end
-
-# Function to compute evaluation metrics
-function compute_evaluation_metrics(beta_matrix, beta_star)
-    diff_matrix = beta_matrix - beta_star
-
-    # Evaluation Metrics
-    mse = sum((diff_matrix) .^ 2) / length(beta_star)  # Mean Squared Error
-    rmse = sqrt(mse)                                  # Root Mean Squared Error
-    mae = sum(abs.(diff_matrix)) / length(beta_star)  # Mean Absolute Error
-    relative_error = norm(diff_matrix) / norm(beta_star)  # Relative Error
-
-    return mse, rmse, mae, relative_error
 end
 
 
