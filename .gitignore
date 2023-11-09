@@ -1,6 +1,4 @@
 # Julia
-*.jl
-*.ji
 *.julia
 
 # R
