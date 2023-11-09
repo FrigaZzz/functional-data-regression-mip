@@ -1,0 +1,108 @@
+# Julia
+*.jl
+*.ji
+*.julia
+
+# R
+*.Rproj.user/
+*.Rhistory
+.RData
+.Ruserdata
+.Rproj
+.renv
+
+# Output files from the directory output
+outputs/*
+
+#libs
+renv/*
+
+#vsc
+.vscode/
+
+
+# Jupyter Notebooks
+.ipynb_checkpoints/
+*.ipynb
+# Gurobi
+*.lp
+*.rlp
+*.ilp
+*.mps
+*.nl
+*.bas
+*.bbl
+*.log
+*.lst
+*.dvi
+*.synctex.gz
+*.fdb_latexmk
+*.fls
+*.aux
+*.blg
+*.out
+*.synctex(busy)
+*.synctex.gz(busy)
+*.glst
+*.glo
+*.gls
+*.idx
+*.ind
+*.lof
+*.lot
+*.nav
+*.nlo
+*.nls
+*.nls.old
+*.snm
+*.toc
+*.vrb
+
+
+##commons
+# Compiled source #
+###################
+*.com
+*.class
+*.dll
+*.exe
+*.o
+*.so
+
+# Packages #
+############
+*.7z
+*.dmg
+*.gz
+*.iso
+*.jar
+*.rar
+*.tar
+*.zip
+
+# Logs and databases #
+######################
+*.log
+*.sql
+*.sqlite
+
+# OS generated files #
+######################
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# R related #
+#############
+.Rhistory
+.RData
+.Ruserdata
+
+# Julia related #
+#################
+.julia
+manifest.toml
