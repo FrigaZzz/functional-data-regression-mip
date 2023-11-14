@@ -18,6 +18,7 @@ function mip_functional_regression(Y, Z, lambda, lambda_group, BIG_M, group_limi
 
     # Define variables
     @variable(model, beta[1:p, 1:r])
+    @variable(model, alpha)
     @variable(model, beta_nonzero[1:p, 1:r], Bin)  # Binary variables indicating whether beta[j, k] is nonzero
     @variable(model, group[1:p], Bin)  # Binary variables indicating whether any coefficient in group j is nonzero
 
@@ -26,8 +27,8 @@ function mip_functional_regression(Y, Z, lambda, lambda_group, BIG_M, group_limi
                            lambda * sum(beta_nonzero[j, k] for j in 1:p, k in 1:r) +  # L0 norm term
                            lambda_group * sum(group[j] for j in 1:p))  # Group sparsity term
 
-    # Constraints to link the binary variables with the beta coefficients
     for j in 1:p
+        # Constraints to link the binary variables with the beta coefficients
         #if any coefficient in a group is nonzero, that group is selected
         @constraint(model, sum(beta_nonzero[j, k] for k in 1:r) <= r * group[j])
         for k in 1:r
@@ -50,11 +51,12 @@ function mip_functional_regression(Y, Z, lambda, lambda_group, BIG_M, group_limi
     # Retrieve the solution
     beta_star = JuMP.value.(beta)
     group_star = JuMP.value.(group)
+    alpha_star = JuMP.value.(alpha)
 
     # Post-process the binary values to enforce 0s and 1s based on a tolerance
     tolerance = 1e-5
     selected = [JuMP.value(beta_nonzero[j, k]) > tolerance ? 1 : 0 for j in 1:p, k in 1:r]
     selected_groups = [group_star[j] > tolerance ? 1 : 0 for j in 1:p]
 
-    return beta_star, selected, selected_groups
+    return beta_star, alpha_star, selected_groups
 end

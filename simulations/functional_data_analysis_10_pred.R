@@ -52,6 +52,8 @@ params <- list(
     function(t) 0 * t, # This assumes that the function returns a single scalar zero
     function(t) 0 * t # This assumes that the function returns a single scalar zero
   ),
+  time_domain = seq(0, 1, length.out = measurements),
+  #   time_domains <- replicate(num_elements, seq(0, 1, length.out = measurements), simplify = FALSE),
   error_sd = 0.05,
   seed = 2000
 )
@@ -67,3 +69,4 @@ W <- result$W
 B <- result$B
 basis_obj <- result$basis_obj
 basis_values <- result$basis_values
+beta_point_values <- result$beta_point_values

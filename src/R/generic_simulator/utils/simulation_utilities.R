@@ -24,25 +24,6 @@ simulate_functional_features <- function(mu_funcs, cov_funcs, n, time) {
 }
 
 
-# Simulate response
-simulate_response <- function(X, beta_func, cov_func, n, measurements, time) {
-  beta_values <- beta_func(time)
-  response <- MASS::mvrnorm(n, rep(0, measurements), cov_func(time, time)) + X %*% t(beta_values) / measurements
-  return(response)
-}
-
-
-# Simulate responses for each functional feature
-simulate_responses <- function(X_list, beta_funcs, cov_funcs, n, measurements, time) {
-  Map(simulate_response, X_list, beta_funcs, MoreArgs = list(cov_func = cov_funcs[[1]], n = n, measurements = measurements, time = time))
-}
-
-# Calculate overall mean of Z and binary outcomes
-calculate_binary_outcomes <- function(Z_list, mean_Z) {
-  sapply(Z_list, function(Z) ifelse(rowMeans(Z) > mean_Z, 1, 0))
-}
-
-
 # Simulate predictor data from paper
 simulate_data_paper <- function(observations, predictors, time_domains, u_funcs) {
   RY <- numeric(observations)
@@ -53,12 +34,29 @@ simulate_data_paper <- function(observations, predictors, time_domains, u_funcs)
     for (m in 1:predictors) {
       time_domain <- time_domains[[m]]
       u_values <- u_funcs[[m]](time_domain)
+      FX[i, m, ] <- u_values 
+    }
+  }
+  return(FX = FX)
+}
+
+
+# Simulate predictor data from paper
+apply_amplitude_norm <- function(FX, observations, predictors) {
+  RY <- numeric(observations)
+  Epsilon <- matrix(NA, nrow = observations, ncol = 1)
+  FX <- array(NA, dim = c(observations, predictors, measurements))
+
+  for (i in 1:observations) {
+    for (m in 1:predictors) {
+      u_values <- FX[i, m, ]
       RY[i] <- max(u_values) - min(u_values)  # Calculate range for each observation and predictor
       Epsilon[i] <- rnorm(1, mean = 0, sd = sqrt(0.025 * RY[i])^2)  # Generate the error term
-      FX[i, m, ] <- u_values #+ Epsilon[i]  # Add the error term to the functional covariate
+      FX[i, m, ] <- u_values + Epsilon[i]  # Add the error term to the functional covariate
     }
   }
   
-  return(list(RY = RY, Epsilon = Epsilon, FX = FX))
+  return(FX = FX)
 }
+
 

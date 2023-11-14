@@ -1,31 +1,31 @@
-#Development
-
-# Julia
-*.julia
-
-# R
+# R project files to ignore
 *.Rproj.user/
 *.Rhistory
 .RData
 .Ruserdata
 .Rproj
-.renv
 
-# Output files from the directory output
-outputs/*
-
-#libs
+# renv library
 renv/*
 
-#vsc
+# Output files and directories
+outputs/*
+data/*
+docs/*
+example/*
+notebooks/*
+renv/*
+scripts/*
+setup/*
+simulations/*
+*
+# Version control system directories
 .vscode/
-workspaces/
 
-# Jupyter Notebooks
+# Jupyter Notebook checkpoints
 .ipynb_checkpoints/
 
-
-# Gurobi
+# Optimization solver files (Gurobi)
 *.lp
 *.rlp
 *.ilp
@@ -59,10 +59,7 @@ workspaces/
 *.toc
 *.vrb
 
-
-##commons
-# Compiled source #
-###################
+# Compiled source files
 *.com
 *.class
 *.dll
@@ -70,8 +67,7 @@ workspaces/
 *.o
 *.so
 
-# Packages #
-############
+# Archive and compressed files
 *.7z
 *.dmg
 *.gz
@@ -81,14 +77,11 @@ workspaces/
 *.tar
 *.zip
 
-# Logs and databases #
-######################
-*.log
+# Log files and databases
 *.sql
 *.sqlite
 
-# OS generated files #
-######################
+# Operating system generated files
 .DS_Store
 .DS_Store?
 ._*
@@ -96,14 +89,3 @@ workspaces/
 .Trashes
 ehthumbs.db
 Thumbs.db
-
-# R related #
-#############
-.Rhistory
-.RData
-.Ruserdata
-
-# Julia related #
-#################
-.julia
-manifest.toml

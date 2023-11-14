@@ -1,6 +1,6 @@
 using Gurobi, JuMP
 
-function mip_functional_regression(Y, Z, lambda, lambda_group, BIG_M)
+function mip_functional_regression(Y, Z, lambda, lambda_group, M)
     n, p, r = size(Z)
 
     # MIP parameters
@@ -30,15 +30,17 @@ function mip_functional_regression(Y, Z, lambda, lambda_group, BIG_M)
         + lambda_group * sum(group[j] for j in 1:p)
     )
 
-     # Linearize the L1 norm
      for j in 1:p
         for k in 1:r
-            @constraint(model, beta[j, k] <= t[j, k])
-            @constraint(model, -beta[j, k] <= t[j, k])
-
+            
             # Apply Big M constraints to ensure beta values are zero if group is zero
             @constraint(model, beta[j, k] <= M * group[j])
             @constraint(model, beta[j, k] >= -M * group[j])
+
+            # Linearize the L1 norm
+            @constraint(model, beta[j, k] <= t[j, k])
+            @constraint(model, -beta[j, k] <= t[j, k])
+
         end
     end
 

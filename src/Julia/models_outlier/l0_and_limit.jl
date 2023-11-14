@@ -7,6 +7,11 @@ function mip_functional_regression(Y, Z, lambda, lambda_group, BIG_M, group_limi
     # MIP parameters
     maxtime = 60
     out = 1
+
+    # outliers
+    frcont = 0.35
+    k_n = floor(n * frcont)
+
     # Create a model
     model = Model(optimizer_with_attributes(Gurobi.Optimizer, "TimeLimit" => maxtime,
                                             "OutputFlag" => out, "Presolve" => 2,
@@ -17,13 +22,22 @@ function mip_functional_regression(Y, Z, lambda, lambda_group, BIG_M, group_limi
                                             "FeasibilityTol" => 1e-6))
 
     # Define variables
+    @variable(model, alpha[1:n]) #intercept
+
     @variable(model, beta[1:p, 1:r])
-    @variable(model, alpha[1:n])
     @variable(model, beta_nonzero[1:p, 1:r], Bin)  # Binary variables indicating whether beta[j, k] is nonzero
     @variable(model, group[1:p], Bin)  # Binary variables indicating whether any coefficient in group j is nonzero
 
+
+    @variable(model, beta_out[1:p, 1:r])
+    @variable(model, beta_nonzero_out[1:p, 1:r], Bin)  # Binary variables indicating whether beta[j, k] is nonzero
+    @variable(model, group_out[1:p], Bin)  # Binary variables indicating whether any coefficient in group j is nonzero
+
+
+
+    
     # Set up the objective function
-    @objective(model, Min, sum((Y[i] - alpha[i] - sum(Z[i, j, k] * beta[j, k] for j in 1:p, k in 1:r))^2 for i in 1:n) +
+    @objective(model, Min, sum((Y[i]  - sum(Z[i, j, k] * beta[j, k] for j in 1:p, k in 1:r) -sum(beta_out[j, k] for j in 1:p, k in 1:r) )^2 for i in 1:n) +
                            lambda * sum(beta_nonzero[j, k] for j in 1:p, k in 1:r) +  # L0 norm term
                            lambda_group * sum(group[j] for j in 1:p))  # Group sparsity term
 
@@ -36,14 +50,23 @@ function mip_functional_regression(Y, Z, lambda, lambda_group, BIG_M, group_limi
             @constraint(model, beta[j, k] <= BIG_M * beta_nonzero[j, k])
             @constraint(model, -beta[j, k] <= BIG_M * beta_nonzero[j, k])
 
+             # Apply Big M constraints to ensure beta values are zero if group is zero
+             @constraint(model, beta_out[j, k] <= 0.5 * BIG_M * beta_nonzero_out[j, k])
+             @constraint(model, -beta_out[j, k] <= 0.5 *  BIG_M * beta_nonzero_out[j, k])
+
             # Link individual nonzeros to group variable
             @constraint(model, beta_nonzero[j, k] <= group[j])
+
+        
         end
        
     end
 
     # Group-level sparsity constraint
     @constraint(model, sum(group[j] for j in 1:p) <= group_limit)
+
+     # Group-level sparsity constraint
+    @constraint(model, sum(group_out[j] for j in 1:p) <= k_n)
 
     # Solve the model
     optimize!(model)
