@@ -23,7 +23,7 @@ function mip_functional_regression(Y, Z, lambda, lambda_group, BIG_M, group_limi
     @variable(model, group[1:p], Bin)  # Binary variables indicating whether any coefficient in group j is nonzero
 
     # Set up the objective function
-    @objective(model, Min, sum((Y[i] - sum(Z[i, j, k] * beta[j, k] for j in 1:p, k in 1:r))^2 for i in 1:n) +
+    @objective(model, Min, sum((Y[i] - alpha - sum(Z[i, j, k] * beta[j, k] for j in 1:p, k in 1:r))^2 for i in 1:n) +
                            lambda * sum(beta_nonzero[j, k] for j in 1:p, k in 1:r) +  # L0 norm term
                            lambda_group * sum(group[j] for j in 1:p))  # Group sparsity term
 

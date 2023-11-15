@@ -22,9 +22,9 @@ mu_funcs <- list(
 )
 
 cov_funcs <- list(
-  list(sig2 = 0.2, rho = 0.11, decay_type = "matern"),
-  list(sig2 = 0.22, rho = 0.21, decay_type = "matern"),
-  list(sig2 = 0.42, rho = 0.31, decay_type = "matern")
+  list(sig2 = 1,  rho = 1, decay_type = "matern"),
+  list(sig2 = 1, rho = 1, decay_type = "matern"),
+  list(sig2 = 1, rho = 1, decay_type = "matern")
 )
 time_domains <- list(
   seq(0, 1, length.out = measurements),

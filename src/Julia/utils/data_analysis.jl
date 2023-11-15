@@ -24,15 +24,9 @@ function get_predictions(Z_coeff, beta_star, alpha_star)
     n, p, r = size(Z_coeff)
     _, r_star = size(beta_star) # get the actual size of beta_star
 
-    predictions = zeros(n)
+    predictions = zeros(n) .+alpha_star
     for i in 1:n
-        prediction = 0
-        for j in 1:p
-            for k in 1:min(r, r_star)  # use the smaller of r and r_star
-                prediction += Z_coeff[i, j, k] * beta_star[j, k]
-            end
-        end
-        predictions[i] = prediction + alpha_star
+        predictions[i] = predictions[i]  + sum(Z_coeff[i,:,:] .* beta_star[:,:])
     end
 
     return predictions
