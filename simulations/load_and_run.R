@@ -10,6 +10,8 @@ library(here)
 
 # Source the generic simulator script
 source(here("src", "R", "generic_simulator", "simulate.R"))
+source(here("src", "R", "generic_simulator", "utils","loader_utilities.R"))
+
 
 # Define the function to run the simulation
 run_simulation <- function(params) {
@@ -17,7 +19,7 @@ run_simulation <- function(params) {
   set.seed(params$seed)
   
   # Call the main analysis function with the parameters
-  result <- do.call(run_functional_data_analysis, params)
+  result <- do.call(generate_data, params[c("predictors", "observations", "measurements", "basis_functions", "intercept", "norder", "mu_funcs", "beta_funcs","time_domains", "cov_funcs", "error_sd", "seed","noise_sd")] )
   
   # Extract the required outputs
   output_list <- list(
@@ -29,28 +31,15 @@ run_simulation <- function(params) {
     B = result$B,
     basis_objs = result$basis_objs,
     basis_values = result$basis_values,
-    beta_point_values = result$beta_point_values,
-    predictors = params$predictors,
-    true_predictors = apply(result$B, 1, function(x) ifelse(all(x == 0), 0, 1))
+    beta_point_values = result$beta_point_values
   )
   
   # Return the output list
   return(output_list)
 }
 
-# Usage:
-params <- list(
-  predictors = predictors,
-  measurements = measurements,
-  observations = observations,
-  basis_functions = basis_functions,
-  intercept = intercept,
-  norder = norder,
-  error_sd = error_sd,
-  seed = seed,
-  mu_funcs = mu_funcs,
-  cov_funcs = cov_funcs,
-  beta_funcs = beta_funcs,
-  time_domains = time_domains
-)
-outputs <- run_simulation(params)
+
+# simulation_name = "3_predictors"
+# simulation_settings_file = "1_active"
+# Required inputs before running the simulation!!!
+inputs  <- load_simulation_settings(simulation_name, simulation_settings_file)

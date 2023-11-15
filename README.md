@@ -147,7 +147,7 @@ This function creates a covariance function based on specified parameters:
 
 #### Data Generation Process:
 
-The `simulate_functional_features` function orchestrates the simulation process, using the mean and covariance functions to generate data for each functional predictor across a specified number of observations and time points.It uses `Map` to apply the simulate_data function to each set of mean and covariance functions, which generates a multi-dimensional array representing multiple functions over the time domain.
+The `simulate_functional_features` function orchestrates the simulation process, using the mean and covariance functions to generate data for each functional predictor across a specified number of observations and time points. It uses `Map` to apply the `simulate_data` function to each set of mean and covariance functions, which generates a multi-dimensional array representing multiple functions over the time domain.
 
 The `simulate_data` generates for each mean and covariance function, a multivariate normal dataset with mean vector `mu` (evaluated mean function at each time point) and covariance matrix `Sigma` (evaluated covariance function at each pair of time points). The result is a matrix where each row corresponds to an observation of the functional data, and each column corresponds to a time point. 
 
@@ -155,6 +155,16 @@ The `simulate_data` generates for each mean and covariance function, a multivari
 
 2. **Covariance Function (`cov_func`)**: Describes how data points are correlated over time. An exponential decay in the covariance function implies that points closer in time are more similar, with the similarity decreasing exponentially as the time gap increases.
 
+
+Using `MASS::mvrnorm` to simulate the data can address the issue of introducing variability across observations for each predictor. 
+
+1. **Covariance Structure**: By using `mvrnorm`, one can specify a covariance matrix that describes the relationships between the predictors. This way, one can simulate data such that the values for each predictor are not only random but also correlated in a specific way. This is essential if the predictors are expected to have some degree of correlation (e.g., measurements that are physiologically linked).
+
+2. **Sampling**: Instead of setting the coefficients at the beginning and keeping them constant across all observations, `mvrnorm` allows one to sample a new set of coefficients for each observation based on the multivariate normal distribution. This means that for each observation, while the mean of the coefficients remains the same (as defined by the model), their actual values will differ due to the randomness introduced by the sampling process.
+
+3. **Variability Across Observations**: The result is that each observation will have its own unique set of coefficients, leading to variability across observations for each predictor. This models the real-world scenario where different instances or subjects have similar but not identical characteristics.
+
+In summary, using `MASS::mvrnorm` introduces the desired variability and correlation into the simulated data, making it more representative of real-world phenomena where predictors are not observed with identical values across different observations. The use of `mvrnorm` is particularly important when the predictors are expected to be correlated, which is common in many real-world data sets.
 
 #### Statistical Effect and Utility:
 

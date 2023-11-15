@@ -1,4 +1,13 @@
 # Covariance function generator
+
+#' Generate a covariance function for a given set of parameters
+#'
+#' @param sig2 The variance parameter
+#' @param rho The range parameter
+#' @param decay_type The type of decay function to use (either "exponential" or "matern")
+#'
+#' @return A covariance function that takes two arguments (t and s) and returns a covariance matrix
+#'
 generate_covariance_function <- function(sig2, rho, decay_type = "exponential") {
   function(t, s) {
     d <- abs(outer(t, s, "-"))

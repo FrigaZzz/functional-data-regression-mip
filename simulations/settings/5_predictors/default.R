@@ -3,13 +3,13 @@
 
 # Define the number of measurements, observations, basis functions, error standard deviation, and seed
 predictors <- 5
-true_predictors = 2
 measurements <- 500
 observations <- 500
 basis_functions = 5
 intercept = 0
 norder = 4
 error_sd = 0.05
+noise_sd = 0.00
 seed = 1
 # Define mu, covariance, and beta functions along with time domains
 mu_funcs <- list(

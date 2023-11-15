@@ -1,12 +1,28 @@
 # Load necessary libraries
 library(fda)
 
+#' Create a basis object for a single functional predictor
+#'
+#' @param basis_functions The number of basis functions to use
+#' @param bm_range The time domain for the functional predictor
+#' @param norder The order of the B-spline basis functions
+#'
+#' @return A basis object for the functional predictor
 create_1_basis <- function(basis_functions, bm_range, norder) {
   # Loop over each functional predictor
     # Use the specific time domain for each functional predictor to create  the basis object
     basis_obj<- fda::create.bspline.basis(rangeval = c(min (bm_range), max(bm_range)), nbasis = basis_functions, norder = norder)
   return(basis_obj)
 }
+
+#' Create a list of basis objects for multiple functional predictors
+#'
+#' @param basis_functions The number of basis functions to use
+#' @param time_domains A list of time domains for each functional predictor
+#' @param norder The order of the B-spline basis functions
+#' @param predictors The number of functional predictors
+#'
+#' @return A list of basis objects for each functional predictor
 create_basis <- function(basis_functions, time_domains, norder, predictors) {
   basis_objs <- vector("list", length = predictors)
   # Loop over each functional predictor
@@ -18,13 +34,25 @@ create_basis <- function(basis_functions, time_domains, norder, predictors) {
   return(basis_objs)
 }
 
-# Function to expand functional data into B-spline basis
+#' Function to expand functional data into B-spline basis
+#' 
+#' @param data_matrix A matrix of functional data
+#' @param time A vector of time points
+#' @param basis_obj A B-spline basis object
+#' 
+#' @return A matrix of coefficients for the B-spline basis
 expand_functional_data <- function(data_matrix, time, basis_obj) {
   fd_list <- apply(data_matrix, 1, function(row) fda::smooth.basis(time, row, basis_obj)$fd)
   do.call(rbind, lapply(fd_list, function(fd) t(fd$coefs)))
 }
 
-# Smooth beta coefficients into the B-spline basis
+#' Smooth beta coefficients into the B-spline basis
+#' 
+#' @param beta_func A function that returns beta values at given time points
+#' @param time A vector of time points
+#' @param basis_obj A B-spline basis object
+#' 
+#' @return A vector of smoothed beta coefficients
 smooth_beta_function <- function(beta_func,time,basis_obj) {
   beta_values <- beta_func(time)
   fdPar_obj <- fdPar(basis_obj)
@@ -34,6 +62,14 @@ smooth_beta_function <- function(beta_func,time,basis_obj) {
   return(beta_coefs)
 }
 
+#' Smooth beta coefficients into the B-spline basis for multiple predictors
+#' 
+#' @param beta_funcs A list of functions that return beta values at given time points
+#' @param num_basis The number of basis functions
+#' @param time A vector of time points
+#' @param basis_obj A B-spline basis object
+#' 
+#' @return A list containing the smoothed beta coefficients, the beta point values, and the basis values
 smooth_betas <- function(beta_funcs,num_basis, time, basis_obj) {
   num_predictors <- length(beta_funcs)
   
@@ -52,7 +88,14 @@ smooth_betas <- function(beta_funcs,num_basis, time, basis_obj) {
   return(list(beta_matrix = beta_matrix, beta_point_values =   beta_point_values, basis_values = basis_values))
 }
 
-# Smooth beta coefficients into the B-spline basis, Different time domains
+#' Smooth beta coefficients into the B-spline basis for multiple predictors with different time domains
+#' 
+#' @param beta_funcs A list of functions that return beta values at given time points
+#' @param num_basis The number of basis functions
+#' @param time_domains A list of vectors of time points for each predictor
+#' @param basis_objs A list of B-spline basis objects for each predictor
+#' 
+#' @return A list containing the smoothed beta coefficients, the beta point values, and the basis values
 smooth_betas_generic <- function(beta_funcs,num_basis, time_domains, basis_objs) {
   num_predictors <- length(beta_funcs)
   measurements <- length(time_domains[[1]])
@@ -75,9 +118,6 @@ smooth_betas_generic <- function(beta_funcs,num_basis, time_domains, basis_objs)
   return(list(beta_matrix = beta_matrix, beta_point_values = beta_point_values, basis_values = basis_values))
 
 }
-
-
-
 
 
 test = FALSE

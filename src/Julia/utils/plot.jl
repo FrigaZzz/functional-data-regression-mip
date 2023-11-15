@@ -1,30 +1,24 @@
 using Plots
 
-function plot_combined_predicted_curve(γ_matrix, γ_star, basis_values, time_domain, folder_path, show_plot =false )
-    mkpath(folder_path)  # Ensure the plots directory exists
-    rm(folder_path, recursive=true)  # Clear the directory
-    mkpath(folder_path)  # Recreate the directory
-    
-    for j in 1:size(γ_matrix, 1)  # Loop over all curves
+"""
+    plot_combined_predicted_curve(γ_matrix, γ_star, basis_values, time_domains, folder_path, show_plot=false)
 
-        
-        combined_curve_matrix = basis_values * γ_matrix[j, :]
-        combined_curve_star = basis_values * γ_star[j, :]
-        
-        # Plot the combined predicted curve for γ_matrix and γ_star
-        p = plot(time_domain, combined_curve_matrix, label="γ_matrix", color=:blue)
-        plot!(time_domain, combined_curve_star, label="γ_predicted", color=:red, linestyle=:dash)
-        
-        if(show_plot)
-            display(p)
-        end
-        # Save the plot to a file
-        savefig(p, joinpath(folder_path, "predictor$(j)_combined_predicted_curve.png"))
-    end
-end
+Plot the combined predicted curve for γ_matrix and γ_star.
 
+# Arguments
+- `γ_matrix`: Coefficient matrix for the training data.
+- `γ_star`: Coefficient matrix for the test data.
+- `basis_values::Array`: Array of basis function values.
+- `time_domains::Array`: Array of time domains.
+- `folder_path::String`: Path to the folder where the plot will be saved.
+- `show_plot::Bool=false`: Whether to display the plot.
 
-function plot_combined_predicted_curve_paper(γ_matrix, γ_star, basis_values,  time_domains, folder_path, show_plot=false)
+# Returns
+- `nothing`
+
+"""
+function plot_combined_predicted_curve(γ_matrix::Any, γ_star::Any, basis_values::Any, time_domains::Array, folder_path::Any, show_plot::Any=false)
+
     mkpath(folder_path)  # Ensure the plots directory exists
     rm(folder_path, recursive=true)  # Clear the directory
     mkpath(folder_path)  # Recreate the directory
@@ -46,6 +40,6 @@ function plot_combined_predicted_curve_paper(γ_matrix, γ_star, basis_values,  
         end
         
         # Save the plot to a file
-        savefig(p, joinpath(folder_path, "predictor$(j)_combined_predicted_curve.png"))
+        savefig(p, joinpath(folder_path, "predictor$(j).png"))
     end
 end

@@ -1,26 +1,54 @@
+
 # Load necessary libraries
 library(refund)
 library(MASS)
 library(fda)
 library(here)
+
 # Source utility files
 source(here("src","R", "generic_simulator", "config.R")) # sets the utility path
 
+#' 
+#' This function simulates functional features.
+#' It takes in predictors, observations, measurements, basis functions, intercept, norder, mu_funcs, beta_funcs,
+#' time_domains, cov_funcs, error_sd, seed, and noise_sd as inputs and returns a list of computed Y values.
+#'
+#' @param predictors A numeric vector of predictor values
+#' @param observations A numeric vector of observation values
+#' @param measurements A numeric vector of measurement values
+#' @param basis_functions A character vector of basis functions
+#' @param intercept A numeric value for the intercept
+#' @param norder An integer value for the order of the B-spline basis
+#' @param mu_funcs A list of functions for the mean of the functional features
+#' @param beta_funcs A list of functions for the beta coefficients
+#' @param time_domains A list of time domains for the functional features
+#' @param cov_funcs A list of covariance functions for the functional features
+#' @param error_sd A numeric value for the standard deviation of the error terms
+#' @param seed An integer value for the random seed
+#' @param noise_sd A numeric value for the standard deviation of the amplitude normalization
+#'
+#' @return A list containing the computed Y values
 
-run_functional_data_analysis <- function(
+generate_data <- function(
     predictors, observations, measurements , basis_functions, intercept = 0, norder,
-    mu_funcs, beta_funcs, time_domains,cov_funcs = NULL ,error_sd =0, seed = 2000, noise_sd = 0) {
+    mu_funcs, beta_funcs, time_domains,cov_funcs ,error_sd =0, seed = 2000, noise_sd = 0) {
 
   # Set seed for reproducibility
   set.seed(seed)
 
-
   # 1. Simulate functional features
-  X <- simulate_functional_features(mu_funcs, cov_funcs, observations, time_domains)
-  # Apply amplitude normalization
+  X <- NULL
+  # cov_funcs is null only for the paper test
+  if (is.null(cov_funcs)) {
+    X <- simulate_functional_features_paper(mu_funcs,     observations, time_domains) 
 
-  # X <- apply_amplitude_norm(X, observations, predictors)
-  
+    # Apply amplitude normalization
+    X <- apply_amplitude_norm(X, observations, predictors)
+  }
+  else{
+    X <- simulate_functional_features(mu_funcs, cov_funcs, observations, time_domains) 
+  }
+
   # 2. Create B-spline basis object
   basis_objs <- create_basis(basis_functions, time_domains, norder, predictors)
   
@@ -43,13 +71,17 @@ run_functional_data_analysis <- function(
   Y <- compute_Y_values(observations, predictors, basis_functions, Beta_matrix, intercept, Z_matrix)
 
   # 8. Apply error terms to Y values
-  
-  Y <- Y + compute_amplitude_norm(Y)
-  # Y <- Y + compute_noise(Y,error_sd)
 
+  # cov_funcs is null only for the paper test
+  if (is.null(cov_funcs)) {
+    Y <- Y + compute_amplitude_norm(Y)
+  }
+  else{
+    Y <- Y + compute_noise(Y,error_sd)
+  }
 
   # Return the computed Y values
-  list(W = W, Z = Z_matrix, Y = Y, J = J, B = Beta_matrix, X = X, basis_obj = basis_objs, basis_values = basis_values,beta_point_values = beta_point_values)
+  list(W = W, Z = Z_matrix, Y = Y, J = J, B = Beta_matrix, X = X, basis_objs = basis_objs, basis_values = basis_values,beta_point_values = beta_point_values)
 }
 
 

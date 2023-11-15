@@ -1,5 +1,14 @@
 
-
+#' Plots the functional predictors for each observation
+#'
+#' @param result A list containing the functional predictors and the response variable
+#' @param n The number of observations
+#' @param M The number of functional predictors
+#' @param t_range The range of the time variable
+#'
+#' @return A plot of the functional predictors for each observation
+#'
+#' @export
 plot_functional_predictors <- function(result, n, M, t_range) {
   for (i in 1:n) {
     for (m in 1:M) {
@@ -17,7 +26,16 @@ plot_functional_predictors <- function(result, n, M, t_range) {
   }
 }
 
-
+#' Plots the design matrix
+#'
+#' @param result The design matrix
+#' @param title The title of the plot
+#' @param xlab The label for the x-axis
+#' @param ylab The label for the y-axis
+#'
+#' @return A plot of the design matrix
+#'
+#' @export
 plot_design_matrix <- function(result,title,xlab,ylab) {
   library(fields)
   par(mfrow = c(1, 1))
