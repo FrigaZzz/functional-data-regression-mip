@@ -1,15 +1,15 @@
 
-# Load necessary libraries
-library(refund)
-library(MASS)
-library(fda)
-library(here)
-
-source(here("src", "R", "paper_simulator", "paper_sim.R"))
-
+# Parameter definitions for a custom simulation
 c = 0
-measurements = 100
-observations = 500
+
+predictors <- 6
+measurements = 50
+observations = 100
+basis_functions = 6
+intercept = 0
+norder = 4
+error_sd = 0.05
+seed = 1
 beta_funcs = list(
   function(t) {
     sin(t)
@@ -30,6 +30,16 @@ beta_funcs = list(
     0 *t # This function always returns 0 regardless of the input t
   }
 )
+ cov_funcs = list(
+  # sig2, rho
+    list(sig2 = 0.2, rho = 0.11,  decay_type = "matern"),
+    list(sig2 = 0.22, rho = 0.21, decay_type = "matern"),
+    list(sig2 = 0.42, rho = 0.31, decay_type ="matern"),
+    list(sig2 = 0.12, rho = 0.11, decay_type = "matern"),
+    list(sig2 = 0.32, rho = 0.01, decay_type ="matern"),
+    list(sig2 = 0.32, rho = 0.01, decay_type ="matern")
+
+  )
 mu_funcs = list(
     function(t) {
         args <- list(a1 = rnorm(1, mean = -4,  sd = sqrt(3 ^ 2)), a2 = rnorm(1, mean = 7, sd = sqrt(1.5 ^ 2)))
@@ -65,32 +75,4 @@ time_domains = list(
   seq(-2, 1, length.out = measurements), 
   seq(-1, 1, length.out = measurements) 
 )
-# Input params
-params <- list(
-  predictors = 6,
-  observations = observations,
-  measurements= measurements,
-  basis_functions = 6,
-  intercept = 0,
-  norder = 4,
-  # t is the range of T values in which the function is evaluated
-  mu_funcs= mu_funcs,
-  beta_funcs= beta_funcs,
-  time_domains= time_domains,
-  seed = 1
-)
-# Call the main analysis function with the parameters
-result <- do.call(run_functional_data_analysis, params)
-# Print the first few rows of Y
-# unpack the list of outputs 
-X <- result$X
-Y <- result$Y
-Z <- result$Z
-J <- result$J
-W <- result$W
-B <- result$B
-basis_obj <- result$basis_obj
-basis_values <- result$basis_values
-beta_point_values <- result$beta_point_values
-predictors <- params$predictors
-true_predictors <- apply(B, 1, function(x) ifelse(all(x == 0), 0, 1))
+

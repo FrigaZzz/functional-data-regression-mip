@@ -40,8 +40,7 @@ end
 
 # Function to save model parameters
 function save_model_parameters(output_dir, params)
-    params_df = DataFrame(params)
-    CSV.write(joinpath(output_dir, "model_params.csv"), params_df)
+    CSV.write(joinpath(output_dir, "model_params.csv"), params)
 end
 
 # Function to save performance evaluation

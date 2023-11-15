@@ -1,7 +1,7 @@
 using JuMP
 using Gurobi
 
-function mip_functional_regression(Y, Z, lambda, lambda_group, BIG_M, group_limit=Inf)
+function mip_functional_regression(Y, Z, weights, lambda, lambda_group, BIG_M, group_limit=Inf)
     n, p, r = size(Z)
     group_limit = min(group_limit, p)
     # MIP parameters
@@ -37,7 +37,7 @@ function mip_functional_regression(Y, Z, lambda, lambda_group, BIG_M, group_limi
 
     
     # Set up the objective function
-    @objective(model, Min, sum((Y[i]  - sum(Z[i, j, k] * beta[j, k] for j in 1:p, k in 1:r) -sum(beta_out[j, k] for j in 1:p, k in 1:r) )^2 for i in 1:n) +
+    @objective(model, Min, sum(weights[i] * (Y[i] - sum(Z[i, j, k] * beta[j, k] for j in 1:p, k in 1:r) )^2 for i in 1:n) +
                            lambda * sum(beta_nonzero[j, k] for j in 1:p, k in 1:r) +  # L0 norm term
                            lambda_group * sum(group[j] for j in 1:p))  # Group sparsity term
 

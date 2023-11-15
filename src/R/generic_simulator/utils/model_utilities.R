@@ -71,15 +71,13 @@ compute_Z_matrix <- function(W_array, J, predictors, basis_functions) {
 
 # # Compute Y matrix
 compute_Y_values <- function(observations, predictors, basis_functions, B_matrix, beta_0, Z_matrix) {
-  Y <- numeric(observations)
+  Y <- rep(beta_0, observations)
+
+  # Compute the sum of products of Z_matrix elements and B_matrix coefficients
   for (i in 1:observations) {
-    Y[i] <- beta_0  # Adding the intercept first
-    for (m in 1:predictors) {
-      for (j in 1:basis_functions) {
-        Y[i] <- Y[i] + B_matrix[m, j] * Z_matrix[i,m,j]
-      }
-    }
+    Y[i] <-  sum(Z_matrix[i,,] * B_matrix)
   }
+
   return(Y)
 }
 
