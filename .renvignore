@@ -1,0 +1,91 @@
+# R project files to ignore
+*.Rproj.user/
+*.Rhistory
+.RData
+.Ruserdata
+.Rproj
+
+# renv library
+renv/*
+
+# Output files and directories
+outputs/*
+data/*
+docs/*
+example/*
+notebooks/*
+renv/*
+scripts/*
+setup/*
+simulations/*
+*
+# Version control system directories
+.vscode/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Optimization solver files (Gurobi)
+*.lp
+*.rlp
+*.ilp
+*.mps
+*.nl
+*.bas
+*.bbl
+*.log
+*.lst
+*.dvi
+*.synctex.gz
+*.fdb_latexmk
+*.fls
+*.aux
+*.blg
+*.out
+*.synctex(busy)
+*.synctex.gz(busy)
+*.glst
+*.glo
+*.gls
+*.idx
+*.ind
+*.lof
+*.lot
+*.nav
+*.nlo
+*.nls
+*.nls.old
+*.snm
+*.toc
+*.vrb
+
+# Compiled source files
+*.com
+*.class
+*.dll
+*.exe
+*.o
+*.so
+
+# Archive and compressed files
+*.7z
+*.dmg
+*.gz
+*.iso
+*.jar
+*.rar
+*.tar
+*.zip
+
+# Log files and databases
+*.sql
+*.sqlite
+
+# Operating system generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
