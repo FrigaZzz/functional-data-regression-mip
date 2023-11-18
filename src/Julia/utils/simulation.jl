@@ -52,6 +52,10 @@ function load_simulation_data(simulation_name, simulation_settings_file, project
             inputs[[param_name]] <- overrides[[param_name]]
         }
         print(inputs$observations)
+        time_domains_eval <- lapply(inputs$time_domains, function(domain) {
+            seq(from = domain[[1]], to = domain[[2]], length.out = inputs$measurements)
+        })
+        inputs$time_domains <- time_domains_eval
         outputs <- run_simulation(inputs)
     """
     full_output = rcopy(R"(outputs)")

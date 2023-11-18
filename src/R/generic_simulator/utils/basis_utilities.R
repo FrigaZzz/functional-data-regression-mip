@@ -62,31 +62,7 @@ smooth_beta_function <- function(beta_func,time,basis_obj) {
   return(beta_coefs)
 }
 
-#' Smooth beta coefficients into the B-spline basis for multiple predictors
-#' 
-#' @param beta_funcs A list of functions that return beta values at given time points
-#' @param num_basis The number of basis functions
-#' @param time A vector of time points
-#' @param basis_obj A B-spline basis object
-#' 
-#' @return A list containing the smoothed beta coefficients, the beta point values, and the basis values
-smooth_betas <- function(beta_funcs,num_basis, time, basis_obj) {
-  num_predictors <- length(beta_funcs)
-  
-  # Initialize a matrix to store the smoothed beta coefficients
-  beta_matrix <-  array(0, dim = c(num_predictors,num_basis))
-  beta_point_values <-  array(0, dim = c(num_predictors,length(time)))
-  basis_values <-   eval.basis(time, basis_obj)
-  for (i in 1:num_predictors) {
-    beta_func <- beta_funcs[[i]]    
-    beta_values <- beta_func(time)
-    beta_point_values[i,] <- beta_values
-    fdPar_obj <- fda::fdPar(basis_obj)
-    smoothed_beta <- fda::smooth.basis(time, beta_values, fdPar_obj)
-    beta_matrix[i,] <- smoothed_beta$fd$coefs
-  }
-  return(list(beta_matrix = beta_matrix, beta_point_values =   beta_point_values, basis_values = basis_values))
-}
+
 
 #' Smooth beta coefficients into the B-spline basis for multiple predictors with different time domains
 #' 
@@ -97,6 +73,7 @@ smooth_betas <- function(beta_funcs,num_basis, time, basis_obj) {
 #' 
 #' @return A list containing the smoothed beta coefficients, the beta point values, and the basis values
 smooth_betas_generic <- function(beta_funcs,num_basis, time_domains, basis_objs) {
+  
   num_predictors <- length(beta_funcs)
   measurements <- length(time_domains[[1]])
   # Initialize a matrix to store the smoothed beta coefficients
@@ -109,6 +86,9 @@ smooth_betas_generic <- function(beta_funcs,num_basis, time_domains, basis_objs)
     time <- time_domains[[i]]
 
     beta_values <- beta_func(time)
+    if(length(beta_values) == 1){ # if beta is a 0
+      beta_values <- rep(0, length(time))
+    }
     beta_point_values[i,] <- beta_values
     basis_values[i,,] <- eval.basis(time, basis_obj)
     fdPar_obj <- fda::fdPar(basis_obj)

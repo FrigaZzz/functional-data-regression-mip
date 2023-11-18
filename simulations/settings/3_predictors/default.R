@@ -6,9 +6,11 @@ beta_funcs <- list(
   function(t) sin(t),
   function(t) 0 * t
 )
+true_predictors <- c(1,1,0)
+
 predictors <- 3
-measurements <- 500
-observations <- 500
+measurements <- 200
+observations <- 100
 basis_functions = 5
 intercept = 0
 norder = 4
@@ -22,13 +24,13 @@ mu_funcs <- list(
 )
 
 cov_funcs <- list(
-  list(sig2 = 1,  rho = 1, decay_type = "matern"),
-  list(sig2 = 1, rho = 1, decay_type = "matern"),
-  list(sig2 = 1, rho = 1, decay_type = "matern")
-)
-time_domains <- list(
-  seq(0, 1, length.out = measurements),
-  seq(0, pi / 3, length.out = measurements), 
-  seq(-1, 1, length.out = measurements)
+  list(sig2 = 0.5,  rho = 1, decay_type = "other"),
+  list(sig2 = 0.5, rho = 1, decay_type =  "other"),
+  list(sig2 = 0.5, rho = 1, decay_type =  "other")
 )
 
+time_domains = list(
+  list(0, 1),
+  list(0, pi / 3),
+  list(-1, 1)
+)

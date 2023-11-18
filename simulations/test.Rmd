@@ -1,0 +1,20 @@
+---
+title: "R Notebook Stub"
+output: html_notebook
+---
+
+```{r chunk-one}
+library(here)
+source(here( "simulations", "load_and_run.R"))
+
+```
+
+```{r chunk-one}
+library(grplasso)
+X = outputs$X
+Y = outputs$Y
+```
+```{r chunk-one}
+
+
+```

@@ -3,12 +3,13 @@
 
 # Define the number of measurements, observations, basis functions, error standard deviation, and seed
 predictors <- 5
-measurements <- 500
-observations <- 500
+true_predictors <- c(1,1,0,0,0)
+measurements <- 100
+observations <- 150
 basis_functions = 5
 intercept = 0
 norder = 4
-error_sd = 0.05
+error_sd = 0.00
 noise_sd = 0.00
 seed = 1
 # Define mu, covariance, and beta functions along with time domains
@@ -21,11 +22,11 @@ mu_funcs <- list(
 )
 
 cov_funcs <- list(
-  list(sig2 = 0.2, rho = 0.11, decay_type = "matern"),
-  list(sig2 = 0.22, rho = 0.21, decay_type = "matern"),
-  list(sig2 = 0.42, rho = 0.31, decay_type = "matern"),
-  list(sig2 = 0.2, rho = 0.11, decay_type = "matern"),
-  list(sig2 = 0.22, rho = 0.21, decay_type = "matern")
+  list(sig2 =0.5, rho = 0.5, decay_type = "matern"),
+  list(sig2 =0.5, rho = 0.5, decay_type = "matern"),
+  list(sig2 =0.5, rho = 0.5, decay_type = "matern"),
+  list(sig2 =0.5, rho = 0.5, decay_type = "matern"),
+  list(sig2 =0.5, rho = 0.5, decay_type = "matern")
 )
 
 beta_funcs <- list(
@@ -33,14 +34,14 @@ beta_funcs <- list(
   function(t) 2 * (1 - abs(t - 1)),
   function(t) 0 * t,
   function(t) 0 * t,
-  function(t) 2 * t
+  function(t) 0 * t
 )
 
-time_domains <- list(
-  seq(0, 1, length.out = measurements),
-  seq(0, pi / 3, length.out = measurements), 
-  seq(-1, 1, length.out = measurements), 
-  seq(0, pi / 3, length.out = measurements), 
-  seq(-2, 1, length.out = measurements)
-)
 
+time_domains = list(
+  list(0, 1),
+  list(0, pi / 3),
+  list(-1, 1),
+  list(0, pi / 3),
+  list(-2, 1)
+)

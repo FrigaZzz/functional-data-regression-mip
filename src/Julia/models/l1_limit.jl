@@ -1,9 +1,8 @@
 using JuMP, Gurobi
 
-function mip_functional_regression(Y, Z, lambda, lambda_group, BIG_M, group_limit=Inf)
+function mip_functional_regression(Y, Z, lambda, lambda_group, BIG_M; intercept = false , group_limit=Inf)
     n, p, r = size(Z)
     group_limit = min(group_limit, p)
-
     # MIP parameters
     MIPpresolve = 2
     MIPheur = 0.5
@@ -22,15 +21,20 @@ function mip_functional_regression(Y, Z, lambda, lambda_group, BIG_M, group_limi
     # Define variables
     @variable(model, beta[1:p, 1:r])
     @variable(model, t[1:p, 1:r] >= 0) # For L1 regularization
-    @variable(model, alpha[1:p])
     @variable(model, group[1:p], Bin) # Boolean variable for group selection
     @variable(model, beta_nonzero[1:p, 1:r], Bin) # Auxiliary binary variables
 
+
+    if intercept
+        @variable(model, alpha)
+    else
+        alpha = 0
+    end
     # Set up the objective function
-    @objective(model, Min,
-        sum((Y[i] - sum(Z[i, j, k] * beta[j, k] for j in 1:p, k in 1:r))^2 for i in 1:n)
-        + lambda * sum(t[j, k] for j in 1:p, k in 1:r) +
-        +lambda_group * sum(group[j] for j in 1:p)
+    @objective(model, Min, sum((Y[i] - alpha - sum(Z[i, j, : ]' * beta[j,:] for j in 1:p))^2 for i in 1:n) +
+
+        + lambda * sum(t[j, k] for j in 1:p, k in 1:r)
+        + lambda_group * sum(group[j] for j in 1:p)
     )
 
     # Constraints to link the group selection with the beta variables
@@ -62,10 +66,11 @@ function mip_functional_regression(Y, Z, lambda, lambda_group, BIG_M, group_limi
     # Retrieve the solution
     beta_star = JuMP.value.(beta)
     z_star = JuMP.value.(Z)
+    alpha_star = JuMP.value.(alpha)
+    group = JuMP.value.(group)
 
     # Post-process the binary values to enforce 0s and 1s based on a tolerance
     tolerance = 1e-5
     selected = [value > tolerance ? 1 : 0 for value in z_star]
-    group = JuMP.value.(group)
-    return beta_star, selected, group
+    return beta_star, alpha_star, group
 end

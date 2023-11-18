@@ -26,7 +26,9 @@ function get_predictions(Z_coeff, beta_star, alpha_star)
 
     predictions = zeros(n) .+alpha_star
     for i in 1:n
-        predictions[i] = predictions[i]  + sum(Z_coeff[i,:,:] .* beta_star[:,:])
+        Y_pred = sum(Z_coeff[i,j,:]' * beta_star[j,:] for j in 1:p)
+        predictions[i] = predictions[i]  + Y_pred
+
     end
 
     return predictions
@@ -62,7 +64,7 @@ Compute various evaluation metrics for a functional data regression model.
 - `CDF_Distance`: Cumulative Distribution Function distance between the true and predicted response variables.
 - `Area_Between_Curves`: Area between the true and predicted response variable curves.
 """
-function compute_metrics(Y_test, Z_coeff, beta_matrix, beta_star, alpha_star, groups, true_predictors_train)
+function compute_metrics(Y_test, Z_coeff, beta_matrix, beta_star, alpha_star, groups, predictors)
     Y_pred = get_predictions(Z_coeff, beta_star, alpha_star)
 
     # Coefficient Evaluation
@@ -75,9 +77,7 @@ function compute_metrics(Y_test, Z_coeff, beta_matrix, beta_star, alpha_star, gr
     rmse_Y = rmse_predictions(Y_test, Y_pred)
     mae_Y = mae_predictions(Y_test, Y_pred)
     r2 = r_squared(Y_test, Y_pred)
-    #  the length of true_predictors_train
-    p = size(true_predictors_train)[1]
-    adj_r2 = adjusted_r_squared(Y_test, Y_pred, p)
+    adj_r2 = adjusted_r_squared(Y_test, Y_pred, predictors)
 
     # FDA Specific Metrics
     func_correlation = functional_correlation(Y_test, Y_pred)

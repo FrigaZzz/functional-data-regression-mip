@@ -31,23 +31,27 @@ source(here("src","R", "generic_simulator", "config.R")) # sets the utility path
 
 generate_data <- function(
     predictors, observations, measurements , basis_functions, intercept = 0, norder,
-    mu_funcs, beta_funcs, time_domains,cov_funcs ,error_sd =0, seed = 2000, noise_sd = 0) {
+    mu_funcs, beta_funcs, time_domains ,cov_funcs ,error_sd =0, seed = 2000, noise_sd = 0.05) {
 
   # Set seed for reproducibility
   set.seed(seed)
 
+  coef_list <- list(
+      '1' = list(a1 = rnorm(observations, mean = -4, sd = 3), a2 = rnorm(observations, mean = 7, sd = 1.5)),
+      '2' = list(b1 = runif(observations, min = 3, max = 7), b2 = rnorm(observations, mean = 0, sd = 1)),
+      '3' = list(c1 = rnorm(observations, mean = -3, sd = sqrt(1.2^2)), c2 = rnorm(observations, mean = 2, sd = sqrt(0.5^2)), c3 = rnorm(observations, mean = -2, sd = 1)),
+      '4' = list(d1 = rnorm(observations, mean = -2, sd = 1), d2 = rnorm(observations, mean = 3, sd = sqrt(1.5^2))),
+      '5' = list(e1 = runif(observations, min = 2, max = 7), e2 = rnorm(observations, mean = 2, sd = sqrt(0.4^2))),
+      '6' = list(f1 = rnorm(observations, mean = 4, sd = sqrt(2^2)), f2 = rnorm(observations, mean = -3, sd = sqrt(0.5^2)), f3 = rnorm(observations, mean = 1, sd = 1))
+  )
   # 1. Simulate functional features
+  U <- NULL
   X <- NULL
-  # cov_funcs is null only for the paper test
-  if (is.null(cov_funcs)) {
-    X <- simulate_functional_features_paper(mu_funcs,     observations, time_domains) 
+  # Pre-generate all coefficients for each predictor and each observation
 
-    # Apply amplitude normalization
-    X <- apply_amplitude_norm(X, observations, predictors)
-  }
-  else{
-    X <- simulate_functional_features(mu_funcs, cov_funcs, observations, time_domains) 
-  }
+  U <- simulate_true_predictors_Ut(mu_funcs, observations, time_domains,coef_list) 
+  # Apply amplitude normalization
+  X <- simulate_observations_Xt(U)
 
   # 2. Create B-spline basis object
   basis_objs <- create_basis(basis_functions, time_domains, norder, predictors)
@@ -68,20 +72,15 @@ generate_data <- function(
   Z_matrix <- compute_Z_matrix_generic(W, J, predictors, basis_functions)
 
   # 7. Compute Y values
-  Y <- compute_Y_values(observations, predictors, basis_functions, Beta_matrix, intercept, Z_matrix)
+  Y <- compute_Y_values(mu_funcs, beta_funcs, observations, predictors, time_domains,intercept,coef_list)$Y
+  # Gu <- result_Y$Gu
 
   # 8. Apply error terms to Y values
 
-  # cov_funcs is null only for the paper test
-  if (is.null(cov_funcs)) {
-    Y <- Y + compute_amplitude_norm(Y)
-  }
-  else{
-    Y <- Y + compute_noise(Y,error_sd)
-  }
+  Y <- Y + compute_amplitude_norm(Y)
 
   # Return the computed Y values
-  list(W = W, Z = Z_matrix, Y = Y, J = J, B = Beta_matrix, X = X, basis_objs = basis_objs, basis_values = basis_values,beta_point_values = beta_point_values)
+  list(W = W, Z = Z_matrix, Y = Y, J = J, B = Beta_matrix, U = U, X = X, basis_objs = basis_objs, basis_values = basis_values,beta_point_values = beta_point_values)
 }
 
 

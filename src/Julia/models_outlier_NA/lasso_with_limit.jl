@@ -28,7 +28,7 @@ function mip_functional_regression(Y, Z, lambda, lambda_group, BIG_M, group_limi
 
     # Set up the objective function
     @objective(model, Min,
-        sum((Y[i] - sum(Z[i, j, k] * beta[j, k] for j in 1:p, k in 1:r))^2 for i in 1:n)
+        sum((Y[i] - sum(Z[i, :, : ] * beta[:,:]))^2 for i in 1:n)
         + lambda * sum(t[j, k] for j in 1:p, k in 1:r) +
         +lambda_group * sum(group[j] for j in 1:p)
     )

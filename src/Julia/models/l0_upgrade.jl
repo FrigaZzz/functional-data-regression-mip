@@ -16,17 +16,46 @@ function mip_functional_regression(Y, Z, lambda, lambda_group, BIG_M; intercept 
                                             "OptimalityTol" => 0.01, "IntFeasTol" => 1e-6,
                                             "FeasibilityTol" => 1e-6))
 
+
+
     # Define variables
     @variable(model, beta[1:p, 1:r])
-    @variable(model, alpha[1:n])
     @variable(model, beta_nonzero[1:p, 1:r], Bin)  # Binary variables indicating whether beta[j, k] is nonzero
     @variable(model, group[1:p], Bin)  # Binary variables indicating whether any coefficient in group j is nonzero
 
-    # Set up the objective function
-    @objective(model, Min, sum((Y[i] - sum(Z[i, j, k] * beta[j, k] for j in 1:p, k in 1:r))^2 for i in 1:n) +
-                           lambda * sum(beta_nonzero[j, k] for j in 1:p, k in 1:r) +  # L0 norm term
-                           lambda_group * sum(group[j] for j in 1:p))  # Group sparsity term
 
+    if intercept
+        @variable(model, alpha)
+    else
+        alpha = 0
+    end
+
+    @variable(model, abs_res[1:n] >= 0)
+    @variable(model, delta[1:p, 2:r])
+    for j in 1:p
+        for k in 2:r
+            @constraint(model, delta[j, k] >= beta[j, k] - beta[j, k-1])
+            @constraint(model, delta[j, k] >= -(beta[j, k] - beta[j, k-1]))
+        end
+    end
+    
+    # Set up the objective function
+    @objective(model, Min, sum(
+        sum(abs_res[i]  for i in 1:n))  +
+        lambda * sum(beta_nonzero[j, k] for j in 1:p, k in 1:r) +   # L0 norm term
+        lambda * sum(sqrt(sum(beta[j, k]^2 for k in 1:r)) * group[j] for j in 1:p)+
+        lambda_group * sum(delta[j, k] for j in 1:p, k in 2:r)
+        )
+
+ 
+
+
+    for i in 1:n
+        @constraint(model, abs_res[i] >= Y[i] - alpha - sum(Z[i, :, : ] * beta[:,:]))
+        @constraint(model, abs_res[i] >= -(Y[i] - alpha - sum(Z[i, :, : ] * beta[:,:])))
+    end
+
+    
     for j in 1:p
         # Constraints to link the binary variables with the beta coefficients
         #if any coefficient in a group is nonzero, that group is selected

@@ -13,3 +13,6 @@ ming yuan paperlibrary -> GRPLASSO LIBRARY ( just compare the L1 to the one )
   -> different number of observations are good
   -> measurements are not impactful -> fix it at 50
   
+
+
+  check https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6684443/

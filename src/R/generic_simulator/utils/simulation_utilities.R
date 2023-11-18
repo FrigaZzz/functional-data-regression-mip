@@ -65,24 +65,24 @@ simulate_functional_features <- function(mu_funcs, cov_funcs_data, n, time_domai
 #' 
 #' @return An array of simulated functional features.
 #' 
-simulate_functional_features_paper <- function(mu_funcs, n, time_domains) {
+simulate_true_predictors_Ut <- function(mu_funcs, n, time_domains,coef_list) {
   predictors = length(mu_funcs)
-  X <- array(0, dim = c(n, predictors,  length(time_domains[[1]])))
-  coef_list <- list(
-      list(a1 = rnorm(1, mean = -4, sd = 3), a2 = rnorm(1, mean = 7, sd = 1.5)),
-      list(b1 = runif(1, min = 3, max = 7), b2 = rnorm(1, mean = 0, sd = 1)),
-      list(c1 = rnorm(1, mean = -3, sd = sqrt(1.2^2)), c2 = rnorm(1, mean = 2, sd = sqrt(0.5^2)), c3 = rnorm(1, mean =    -2, sd = 1)),
-      list(d1 = rnorm(1, mean = -2, sd = 1), d2 = rnorm(1, mean = 3, sd = sqrt(1.5^2))),
-      list(e1 = runif(1, min = 2, max = 7), e2 = rnorm(1, mean = 2, sd = sqrt(0.4^2))),
-      list(f1 = rnorm(1, mean = 4, sd = sqrt(2^2)), f2 = rnorm(1, mean = -3, sd = sqrt(0.5^2)), f3 = rnorm(1, mean = 1,     sd = 1))
-  )
+  measurements = length(time_domains[[1]])
+  X <- array(0, dim = c(n, predictors, measurements))
+  # Generate the functional data for each observation and each predictor
   for (i in 1:n) {
     for (j in 1:predictors) {
-      X[i, j, ] <- mu_funcs[[j]](time_domains[[j]])
+      # Extract the coefficients for the j-th predictor of the i-th observation
+      current_coefs <- lapply(coef_list[[j]], function(row) row[i])
+      # Apply the mu_funcs function with the time domain for the j-th predictor
+      # and the current coefficients for the i-th observation
+      X[i, j, ] <- mu_funcs[[j]](time_domains[[j]], current_coefs)
     }
   }
+  
   return(X)
 }
+
 
 
 #' Apply amplitude normalization to predictor data and add random error terms
@@ -98,10 +98,12 @@ simulate_functional_features_paper <- function(mu_funcs, n, time_domains) {
 #' @examples
 #' apply_amplitude_norm(X, observations, predictors)
 #'
-apply_amplitude_norm <- function(X, observations, predictors) {
+simulate_observations_Xt <- function(X) {
   measurements <- dim(X)[3]
+  predictors <- dim(X)[2]
+  observations <- dim(X)[1]
   # Initialize the array for the normalized functional covariates
-  FX <- array(NA, dim = c(observations, predictors, measurements))
+  FX <- array(0, dim = c(observations, predictors, measurements))
 
   for (i in 1:observations) {
     for (m in 1:predictors) {
@@ -112,7 +114,7 @@ apply_amplitude_norm <- function(X, observations, predictors) {
       RY <- max(u_values) - min(u_values)
       
       # Calculate the standard deviation of the error term based on the range
-      sd_epsilon <- sqrt(0.025 * RY^2)
+      sd_epsilon <- (0.025 * RY)
       
       # Generate the error term for this observation and predictor
       epsilon_im <- rnorm(measurements, mean = 0, sd = sd_epsilon)
@@ -126,5 +128,82 @@ apply_amplitude_norm <- function(X, observations, predictors) {
 }
 
 
+#' Compute Y matrix given observations, predictors, basis functions, B matrix, beta_0, and Z matrix
+#'
+#' @param observations Number of observations
+#' @param predictors Number of predictors
+#' @param basis_functions Basis functions
+#' @param B_matrix B matrix
+#' @param beta_0 Intercept
+#' @param Z_matrix Z matrix
+#'
+#' @return Y matrix
+#'
+#' @examples
+#' compute_Y_values(10, 5, basis_functions, B_matrix, 0, Z_matrix)
+compute_Y_values <- function(mu_funcs, beta_funcs, observations, predictors, time_domains, intercept,coef_list=NULL) {
+  Y <- numeric(observations)
+  
+  for (i in 1:observations) {
+    for (j in 1:predictors) {
+      # Define a function that is the product of the functional predictor and the coefficient function
+      current_coefs <- lapply(coef_list[[j]], function(row) row[i])
+
+      integrand <- function(t) {
+        mu = mu_funcs[[j]](t,current_coefs)
+        beta = beta_funcs[[j]](t)
+        mu * beta
+        # Perform numerical integration of the integrand over the time domain Tm
+      
+        }
+        Y[i] <- Y[i] + integrate(integrand, lower = min(time_domains[[j]]),   upper = max(time_domains[[j]]))$value
+    }
+  }
+  
+  return(list(Y=Y))
+}
 
 
+
+#' Compute amplitude normalization factor for functional data regression
+#'
+#' This function computes the amplitude normalization factor for functional data regression.
+#' The function takes in a vector of observations Y and an error standard deviation error_sd.
+#' It returns a vector of random errors Epsilon with the same length as Y.
+#'
+#' @param Y A vector of observations
+#' @param error_sd The standard deviation of the error term
+#' 
+#' @return A vector of random errors Epsilon with the same length as Y
+#'
+#' @examples
+#' Y <- rnorm(100)
+#' compute_amplitude_norm(Y, error_sd = 0.05)
+#'
+compute_amplitude_norm<- function(Y, error_sd = 0.05) {
+  observations <- length(Y)
+  Epsilon <- numeric(observations)
+  Ry <- max(Y) - min(Y)  # Calculate the range of Y
+  Epsilon <- rnorm(observations, mean = 0, sd = (error_sd * Ry))
+  return(Epsilon)
+}
+
+#' Compute noise for a given set of observations
+#'
+#' This function generates random noise for a given set of observations.
+#' The noise is generated from a normal distribution with mean 0 and standard deviation error_sd.
+#'
+#' @param Y A numeric vector of observations
+#' @param error_sd A numeric value representing the standard deviation of the error term
+#'
+#' @return A numeric vector of random noise
+#'
+#' @examples
+#' Y <- c(1, 2, 3, 4, 5)
+#' compute_noise(Y, error_sd = 0.1)
+#'
+compute_noise <- function(Y, error_sd = 0.05) {
+  observations <- length(Y)
+  noise <- rnorm(observations, mean = 0, sd = error_sd)
+  return(noise)
+}
