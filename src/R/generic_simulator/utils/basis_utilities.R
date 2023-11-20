@@ -84,11 +84,7 @@ smooth_betas_generic <- function(beta_funcs,num_basis, time_domains, basis_objs)
     beta_func <- beta_funcs[[i]]
     basis_obj <- basis_objs[[i]]
     time <- time_domains[[i]]
-
     beta_values <- beta_func(time)
-    if(length(beta_values) == 1){ # if beta is a 0
-      beta_values <- rep(0, length(time))
-    }
     beta_point_values[i,] <- beta_values
     basis_values[i,,] <- eval.basis(time, basis_obj)
     fdPar_obj <- fda::fdPar(basis_obj)

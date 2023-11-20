@@ -14,8 +14,7 @@ observations <- 100
 basis_functions = 5
 intercept = 0
 norder = 4
-error_sd = 0.05
-noise_sd = 0.00
+noise_snr = c(100,100)
 seed = 1
 mu_funcs <- list(
   function(t) sin(2 * pi * t),
@@ -24,9 +23,9 @@ mu_funcs <- list(
 )
 
 cov_funcs <- list(
-  list(sig2 = 0.5,  rho = 1, decay_type = "other"),
-  list(sig2 = 0.5, rho = 1, decay_type =  "other"),
-  list(sig2 = 0.5, rho = 1, decay_type =  "other")
+  list(sig2 = 0.5, rho = 1, decay_type = "matern"),
+  list(sig2 = 0.5, rho = 1, decay_type =  "matern"),
+  list(sig2 = 0.5, rho = 1, decay_type =  "matern")
 )
 
 time_domains = list(

@@ -1,5 +1,6 @@
 library(MASS)
 library(here)
+library(fda)
 
 source(here("src", "R",  "generic_simulator",   "utils" , "covariance_utilities.R"))
 
@@ -32,7 +33,6 @@ simulate_data <- function(mu_func, cov_func_data, time_domain, n) {
 #' @param cov_funcs_data A list of covariance functions.
 #' @param n The number of observations to simulate.
 #' @param time_domains A list of time domains for each functional feature.
-#' 
 #' @return A 3D array of simulated functional features.
 #' 
 #' @examples
@@ -42,11 +42,11 @@ simulate_data <- function(mu_func, cov_func_data, time_domain, n) {
 #' cov_funcs_data <- list(cov1, cov2)
 #' simulate_functional_features(mu_funcs, cov_funcs_data, 100, time_domains)
 #' 
-simulate_functional_features <- function(mu_funcs, cov_funcs_data, n, time_domains) {
-  X_list = Map(simulate_data, mu_funcs, cov_funcs_data, time_domains, MoreArgs = list(n = n))
+simulate_functional_features <- function(mu_funcs, cov_funcs_data, observations, time_domains) {
+  X_list = Map(simulate_data, mu_funcs, cov_funcs_data, time_domains, MoreArgs = list(n = observations))
 
   predictors = length(mu_funcs)
-  X <- array(0, dim = c(n, predictors,  length(time_domains[[1]])))
+  X <- array(0, dim = c(observations, predictors,  length(time_domains[[1]])))
 
   # Fill the 3D array with data from simulated_features
   for (i in 1:predictors) {
@@ -60,15 +60,24 @@ simulate_functional_features <- function(mu_funcs, cov_funcs_data, n, time_domai
 #' This function simulates functional features for the paper using the provided mean functions,  number of observations and time domains.
 #' 
 #' @param mu_funcs A list of mean functions.
-#' @param n The number of observations.
+#' @param observations The number of observations.
 #' @param time_domains A list of time domains.
 #' 
 #' @return An array of simulated functional features.
 #' 
-simulate_true_predictors_Ut <- function(mu_funcs, n, time_domains,coef_list) {
+simulate_true_predictors_Ut <- function(mu_funcs, observations, time_domains) {
   predictors = length(mu_funcs)
   measurements = length(time_domains[[1]])
-  X <- array(0, dim = c(n, predictors, measurements))
+  coef_list <- list(
+    '1' = list(a1 = rnorm(observations, mean = -4, sd = 3), a2 = rnorm(observations, mean = 7, sd = 1.5)),
+    '2' = list(b1 = runif(observations, min = 3, max = 7), b2 = rnorm(observations, mean = 0, sd = 1)),
+    '3' = list(c1 = rnorm(observations, mean = -3, sd = sqrt(1.2^2)), c2 = rnorm(observations, mean = 2, sd = sqrt(0.5^2)), c3 = rnorm(observations, mean = -2, sd = 1)),
+    '4' = list(d1 = rnorm(observations, mean = -2, sd = 1), d2 = rnorm(observations, mean = 3, sd = sqrt(1.5^2))),
+    '5' = list(e1 = runif(observations, min = 2, max = 7), e2 = rnorm(observations, mean = 2, sd = sqrt(0.4^2))),
+    '6' = list(f1 = rnorm(observations, mean = 4, sd = sqrt(2^2)), f2 = rnorm(observations, mean = -3, sd = sqrt(0.5^2)), f3 = rnorm(observations, mean = 1, sd = 1))
+  )
+
+  X <- array(0, dim = c(observations, predictors, measurements))
   # Generate the functional data for each observation and each predictor
   for (i in 1:n) {
     for (j in 1:predictors) {
@@ -84,6 +93,22 @@ simulate_true_predictors_Ut <- function(mu_funcs, n, time_domains,coef_list) {
 }
 
 
+#' Create Beta Curves
+#'
+#' Generates beta curves for functional data based on provided functions and time domains.
+#'
+#' @param beta_funcs Functions to generate beta values.
+#' @param time_domains Time domains for beta functions.
+#' @return Array of beta curves.
+create_beta_curves <- function(beta_funcs, time_domains) {
+  predictors = length(beta_funcs)
+  Betas <- array(0, dim = c(predictors, length(time_domains[[1]])))
+  for (j in 1:predictors) {
+    Betas[j, ] <- beta_funcs[[j]](time_domains[[j]])
+  }
+  return(Betas)
+}
+
 
 #' Apply amplitude normalization to predictor data and add random error terms
 #'
@@ -92,12 +117,7 @@ simulate_true_predictors_Ut <- function(mu_funcs, n, time_domains,coef_list) {
 #' @param X array of predictor data
 #' @param observations number of observations
 #' @param predictors number of predictors
-#' 
 #' @return An array of predictor data with added error terms.
-#'
-#' @examples
-#' apply_amplitude_norm(X, observations, predictors)
-#'
 simulate_observations_Xt <- function(X) {
   measurements <- dim(X)[3]
   predictors <- dim(X)[2]
@@ -127,41 +147,85 @@ simulate_observations_Xt <- function(X) {
   return(FX)
 }
 
+#' Add SNR Noise to Signal
+#'
+#' Adds noise to a signal to achieve a specified Signal-to-Noise Ratio (SNR).
+#'
+#' @param Y Signal to which noise will be added.
+#' @param snr_db Desired SNR in decibels.
+#' @return Signal with added noise.
+apply_snr_to_X <- function(X, snr_db = 100) {
+  # Determine the size of X
+  num_observations <- dim(X)[1]
+  num_predictors <- dim(X)[2]
+  num_time_points <- dim(X)[3]
 
-#' Compute Y matrix given observations, predictors, basis functions, B matrix, beta_0, and Z matrix
-#'
-#' @param observations Number of observations
-#' @param predictors Number of predictors
-#' @param basis_functions Basis functions
-#' @param B_matrix B matrix
-#' @param beta_0 Intercept
-#' @param Z_matrix Z matrix
-#'
-#' @return Y matrix
-#'
-#' @examples
-#' compute_Y_values(10, 5, basis_functions, B_matrix, 0, Z_matrix)
-compute_Y_values <- function(mu_funcs, beta_funcs, observations, predictors, time_domains, intercept,coef_list=NULL) {
-  Y <- numeric(observations)
-  
-  for (i in 1:observations) {
-    for (j in 1:predictors) {
-      # Define a function that is the product of the functional predictor and the coefficient function
-      current_coefs <- lapply(coef_list[[j]], function(row) row[i])
+  # Iterate over each predictor
+  for (predictor in 1:num_predictors) {
+    for (time_point in 1:num_time_points) {
+      # Extract the measurements for this predictor across all observations at the given time point
+      measurements <- X[, predictor, time_point]
 
-      integrand <- function(t) {
-        mu = mu_funcs[[j]](t,current_coefs)
-        beta = beta_funcs[[j]](t)
-        mu * beta
-        # Perform numerical integration of the integrand over the time domain Tm
-      
-        }
-        Y[i] <- Y[i] + integrate(integrand, lower = min(time_domains[[j]]),   upper = max(time_domains[[j]]))$value
+      # Apply the SNR function to these measurements
+      measurements_noisy <- add_snr_noise(measurements, snr_db)
+
+      # Update the measurements in X
+      X[, predictor, time_point] <- X[, predictor, time_point] + measurements_noisy
     }
   }
-  
-  return(list(Y=Y))
+
+  return(X)
 }
+
+#' Compute Y Values
+#'
+#' Computes Y values (response variable) using functional data, beta curves, and other parameters.
+#'
+#' @param X_data Functional data for predictors.
+#' @param beta_curves Beta curves for predictors.
+#' @param observations Number of observations.
+#' @param predictors Number of predictors.
+#' @param time_domains Time domains for predictors.
+#' @param intercept Intercept value for Y computation.
+#' @return List containing computed Y values.
+compute_Y_values <- function(X_data, beta_curves, observations, predictors, time_domains, intercept = 0) {
+  Y <- numeric(observations)
+  basis_functions <- 6
+
+  # Create basis functions for each predictor
+  basis_list <- lapply(time_domains, function(td) {
+    create.bspline.basis(rangeval = c(min(td), max(td)), nbasis = basis_functions)
+  })
+
+  # Smooth beta_curves
+  beta_fd_list <- lapply(1:predictors, function(j) {
+    smooth.basis(time_domains[[j]], beta_curves[j, ], basis_list[[j]])$fd
+  })
+
+  # Compute Y values for each observation
+  for (i in 1:observations) {
+    Y[i] <- intercept
+    for (j in 1:predictors) {
+      # Extract the time series for the current observation and predictor
+      current_series <- X_data[i, j, ]
+
+      # Smooth the current series into a functional data object
+      X_fd <- smooth.basis(time_domains[[j]], current_series, basis_list[[j]])$fd
+
+      # Compute the product of X_fd and beta_fd as a new functional data object
+      product_fd <- X_fd * beta_fd_list[[j]]
+
+      # Create a constant function for integration
+      constant_fd <- fd(matrix(1, nrow = basis_functions, ncol = 1), basis_list[[j]])
+
+      # Perform functional integration over the time domain
+      Y[i] <- Y[i] + inprod(product_fd, constant_fd)
+    }
+  }
+
+  return(list(Y = Y))
+}
+
 
 
 
@@ -198,12 +262,42 @@ compute_amplitude_norm<- function(Y, error_sd = 0.05) {
 #'
 #' @return A numeric vector of random noise
 #'
-#' @examples
-#' Y <- c(1, 2, 3, 4, 5)
-#' compute_noise(Y, error_sd = 0.1)
 #'
 compute_noise <- function(Y, error_sd = 0.05) {
   observations <- length(Y)
   noise <- rnorm(observations, mean = 0, sd = error_sd)
   return(noise)
+}
+
+
+
+
+#' Compute Noise and Add to Signal
+#'
+#' This function adds noise to a given signal `Y` such that the resulting noisy signal has an approximate Signal-to-Noise Ratio (SNR) specified by `snr_db`. 
+#' The noise added is normally distributed.
+#'
+#' @param Y Numeric vector representing the original signal to which noise will be added.
+#' @param snr_db Desired Signal-to-Noise Ratio in decibels (dB). This parameter specifies the relative power of the signal to the noise.
+#' @param error_sd Optional parameter, standard deviation of the error, with a default value of 0.05. This parameter is used to adjust the scale of the noise if needed.
+#'
+#' @return Returns the original signal `Y` with added noise. The resulting noisy signal has an SNR approximately equal to the specified `snr_db`.
+#'
+add_snr_noise <- function(Y, snr_db = 0) {
+  # Calculate the power of the signal
+  signal_power <- var(Y)
+
+  # Convert SNR from dB to linear scale
+  snr_linear <- 10^(snr_db / 10)
+
+  # Calculate the required noise power
+  noise_power <- signal_power / snr_linear
+
+  # Calculate the standard deviation for the noise
+  noise_sd <- sqrt(noise_power)
+  # Generate noise
+  Epsilon <- rnorm(length(Y), mean = 0, sd = noise_sd)
+
+
+  return(Epsilon)
 }

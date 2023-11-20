@@ -1,35 +1,35 @@
 
 # Modified run_model_and_save_outputs function
-function run_model_and_save_outputs(model_name, simulation_name, setting_name, observations, observations_test, measurements, basis_functions, error_sd, seed, λ, λ_group, M, override_true_predictors=nothing)
+function run_model_and_save_outputs(model_name, simulation_name, setting_name, observations, observations_test, measurements, basis_functions, noise_snr, seed, λ, λ_group, M)
     # Include model file
     include(joinpath(project_root, "src", "Julia", "models", model_name * ".jl"))
 
     # write the rput macro to pass the variable to R
-    train_data = load_simulation_data(simulation_name, setting_name, project_root, observations, measurements, basis_functions, error_sd, seed)
+    train_data = load_simulation_data(simulation_name, setting_name, project_root; observations = observations, measurements = measurements, basis_functions = basis_functions, noise_snr = noise_snr, seed =seed)
 
     Y_train, intercept, Z_train, beta_matrix_train, predictors_train, true_predictors_train = (
         train_data[:Y], train_data[:intercept], train_data[:Z], train_data[:B], train_data[:predictors], train_data[:true_predictors]
     )
 
-    test_data = load_simulation_data(simulation_name, setting_name, project_root, observations_test, measurements, basis_functions, error_sd, seed)
+    test_data = load_simulation_data(simulation_name, setting_name, project_root; observations = observations_test, measurements = measurements, basis_functions = basis_functions, noise_snr = noise_snr, seed = seed) 
 
     Y_test, Z_test = (
         test_data[:Y], test_data[:Z]
     )
 
 
-    output_dir = define_output_dir(model_name, simulation_name, observations, observations_test, basis_functions, measurements, λ, λ_group, M, error_sd, seed, project_root)
+    output_dir = define_output_dir(model_name, simulation_name, observations, observations_test, basis_functions, measurements, λ, λ_group, M, noise_snr, seed, project_root)
     ensure_directory_exists(output_dir)
 
 
     beta_star = alpha = groups = nothing
 
     to_predict = sum(true_predictors_train)
-
-    beta_star, alpha, groups = mip_functional_regression(Y_train, Z_train, λ, λ_group, M, to_predict)
+    intercept = train_data[:intercept]
+    beta_star, alpha, groups = mip_functional_regression(Y_train, Z_train, λ, λ_group, M, intercept != 0 , to_predict)
 
     # Compute Metrics and save to file
-    performance_metrics = compute_metrics(Y_test, Z_test, beta_matrix_train, beta_star, alpha, groups, true_predictors_train)
+    performance_metrics = compute_metrics(Y_test, Z_test, beta_matrix_train, beta_star, alpha, groups, to_predict)
     save_performance_evaluation(output_dir, performance_metrics)
 
     # Save model parameters
@@ -49,7 +49,7 @@ function run_model_and_save_outputs(model_name, simulation_name, setting_name, o
     model_params."Lambda" = [λ]
     model_params."LambdaGroup" = [λ_group]
     model_params."M" = [M]
-    model_params."ErrorSD" = [error_sd]
+    model_params."SNR" = [noise_snr]
     model_params."Seed" = [seed]
 
 
@@ -68,13 +68,13 @@ function run_model_and_save_outputs(model_name, simulation_name, setting_name, o
 
 
 end
+project_root = dirname(@__DIR__)
 
 include(joinpath(project_root, "setup", "init_env.jl"))
 
-project_root = dirname(@__DIR__)
 set_R_lib_path(project_root)
-# model_name = "l0_and_limit.jl"
-# include(joinpath(project_root, "src", "Julia", "models", model_name))
+model_name = "l0_limit.jl"
+include(joinpath(project_root, "src", "Julia", "models", model_name))
 include(joinpath(project_root, "src", "Julia", "utils", "simulation.jl"))
 include(joinpath(project_root, "src", "Julia", "utils", "file_management.jl"))
 include(joinpath(project_root, "src", "Julia", "utils", "data_analysis.jl"))
@@ -82,7 +82,7 @@ include(joinpath(project_root, "src", "Julia", "utils", "data_analysis.jl"))
 
 if isempty(ARGS)
     # Predefined values
-    run_model_and_save_outputs("l0_and_limit", "5_predictors", "default", 2500, 500, 250, 6, 0.01, 1, 0.01, 0.001, 1000, nothing)
+    run_model_and_save_outputs("l0_limit", "3_predictors", "default", 2500, 500, 250, 6, [100,100], 1, 0.01, 0.001, 1000)
 
 else
     # Values from command-line arguments

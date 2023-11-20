@@ -1,20 +1,20 @@
 using JuMP
 using Gurobi
 
-function mip_functional_regression(Y, Z, lambda, lambda_group, BIG_M; intercept = false , group_limit=Inf)
+function mip_functional_regression(Y, Z, lambda, lambda_group, BIG_M, intercept = false , group_limit=Inf)
     n, p, r = size(Z)
     group_limit = min(group_limit, p)
     # MIP parameters
-    maxtime = 60
+    maxtime = 600
     out = 1
     # Create a model
     model = Model(optimizer_with_attributes(Gurobi.Optimizer, "TimeLimit" => maxtime,
                                             "OutputFlag" => out, "Presolve" => 2,
-                                            "Heuristics" => 0.5, "MIPGap" => 0.05,
-                                            "Threads" => 1, "MIPFocus" => 1,
+                                            "Heuristics" => 0, "MIPGap" => 0.000005,
+                                            "Threads" => 1, "MIPFocus" => 0,
                                             "NumericFocus" => 1, "NonConvex" => 2,
-                                            "OptimalityTol" => 0.01, "IntFeasTol" => 1e-6,
-                                            "FeasibilityTol" => 1e-6))
+                                            "OptimalityTol" => 0.0001, "IntFeasTol" => 1e-9,
+                                            "FeasibilityTol" => 1e-9))
 
 
 

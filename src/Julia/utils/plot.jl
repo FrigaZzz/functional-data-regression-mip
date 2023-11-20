@@ -17,16 +17,16 @@ Plot the combined predicted curve for γ_matrix and γ_star.
 - `nothing`
 
 """
-function plot_combined_predicted_curve(γ_matrix::Any, γ_star::Any, basis_values::Any, time_domains::Array, folder_path::Any, show_plot::Any=false)
+function plot_combined_predicted_curve(beta_point_values::Any, γ_star::Any, basis_values::Any, time_domains::Array, folder_path::Any, show_plot::Any=false)
 
     mkpath(folder_path)  # Ensure the plots directory exists
     rm(folder_path, recursive=true)  # Clear the directory
     mkpath(folder_path)  # Recreate the directory
-    predictors =  size(γ_matrix, 1)
+    predictors =  size(γ_star, 1)
     for j in 1:predictors  # Loop over all curves
         curr_basis = basis_values[j,:,:]
         # reshape curr_basis
-        combined_curve_matrix = curr_basis * γ_matrix[j, :]
+        combined_curve_matrix = beta_point_values[j, :]
         combined_curve_star = curr_basis * γ_star[j, :]
         
         

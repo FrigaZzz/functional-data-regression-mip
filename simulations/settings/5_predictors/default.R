@@ -9,8 +9,7 @@ observations <- 150
 basis_functions = 5
 intercept = 0
 norder = 4
-error_sd = 0.00
-noise_sd = 0.00
+noise_snr = c(100,100)
 seed = 1
 # Define mu, covariance, and beta functions along with time domains
 mu_funcs <- list(

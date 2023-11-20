@@ -20,7 +20,7 @@ Function to load R simulation data.
 - `output::Dict`: A dictionary containing the simulation inputs and outputs.
 """
 # Function to load R simulation data
-function load_simulation_data(simulation_name, simulation_settings_file, project_root; observations=nothing, measurements=nothing, basis_functions=nothing, error_sd=nothing, seed=nothing)
+function load_simulation_data(simulation_name, simulation_settings_file, project_root; observations=nothing, measurements=nothing, basis_functions=nothing, noise_snr=nothing, seed=nothing)
     # clear R environment
     # load new simulation data
     runner_file_path = joinpath(project_root, "simulations", "load_and_run.R")
@@ -35,8 +35,8 @@ function load_simulation_data(simulation_name, simulation_settings_file, project
     if basis_functions != nothing
         overrides["basis_functions"] = basis_functions
     end
-    if error_sd != nothing
-        overrides["error_sd"] = error_sd
+    if noise_snr != nothing
+        overrides["noise_snr"] = noise_snr
     end
     if seed != nothing
         overrides["seed"] = seed
@@ -47,11 +47,11 @@ function load_simulation_data(simulation_name, simulation_settings_file, project
     @rput runner_file_path
     @rput overrides
     R"""
+
         source(runner_file_path)
         for (param_name in names(overrides)) {
             inputs[[param_name]] <- overrides[[param_name]]
         }
-        print(inputs$observations)
         time_domains_eval <- lapply(inputs$time_domains, function(domain) {
             seq(from = domain[[1]], to = domain[[2]], length.out = inputs$measurements)
         })

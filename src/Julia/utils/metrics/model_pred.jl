@@ -82,11 +82,9 @@ Compute the adjusted R-squared value between the true values `Y_true` and the pr
 - `adj_r2::Float64`: the adjusted R-squared value between `Y_true` and `Y_pred`.
 """
 function adjusted_r_squared(Y_true, Y_pred, number_of_predictors)
-    
     # Assuming y_actual and y_predicted are arrays of actual and    predicted values
     n = length(Y_true) # Number of observations
     p = number_of_predictors # Replace with the actual number of    predictors in your model
-
     # Calculate R-squared
     SS_res = sum((Y_true - Y_pred) .^ 2)
     SS_tot = sum((Y_true .- mean(Y_pred)) .^ 2)

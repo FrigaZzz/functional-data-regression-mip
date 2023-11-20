@@ -25,7 +25,6 @@ source(here("src","R", "generic_simulator", "config.R")) # sets the utility path
 #' @param cov_funcs A list of covariance functions for the functional features
 #' @param seed An integer value for the random seed
 #' @param noise_snr Defines the amount of noise to add to the data 
-#'
 #' @return A list containing the computed Y values
 
 generate_data <- function(
@@ -34,25 +33,23 @@ generate_data <- function(
 
   # Set seed for reproducibility
   set.seed(seed)
-  
   # 1. Simulate input data
   U <- NULL
   X <- NULL
 
   # Simulate true predictors
-  U <- simulate_true_predictors_Ut(mu_funcs, observations, time_domains) 
+  X <- simulate_functional_features(mu_funcs, cov_funcs, observations, time_domains)
   Betas <- create_beta_curves(beta_funcs,  time_domains)
 
   # Apply amplitude normalization to get observed features
-  X <-  simulate_observations_Xt(U)
-  # X <-  apply_snr_to_X(U, noise_snr[1])
-
+  # X <-  simulate_observations_Xt(U)
+  X <-  apply_snr_to_X(X, noise_snr[1])
   # Simulate observed Y values 
-  Y <- compute_Y_values(X, Betas, observations, predictors,  intercept)$Y
+  Y <- compute_Y_values(X, Betas, observations, predictors,time_domains, intercept)$Y
 
   # Apply error terms to Y values
-  Y <- Y + compute_amplitude_norm(Y)
-  # Y <- Y + add_snr_noise(Y, noise_snr[2])
+  # Y <- Y + compute_amplitude_norm(Y)
+  Y <- Y + add_snr_noise(Y, noise_snr[2])
 
 
   # 2. Create B-spline basis object

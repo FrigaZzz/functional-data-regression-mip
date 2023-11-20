@@ -21,17 +21,17 @@ library(here)
 load_simulation_settings <- function(setting_name, variant_name = NULL) {
     default_path <- here("simulations", "settings", setting_name, "default.R")
     variant_path <- NULL
-    
+
     # Load the default settings
     if (file.exists(default_path)) {
         source(default_path)
     } else {
         stop("Default settings file does not exist: ", default_path)
     }
-    
+
     # If a variant is specified, construct its path and source it
     if (!is.null(variant_name) && variant_name != "default") {
-        variant_path <- here( "simulations", "settings", setting_name, "variants", paste0(variant_name, ".R"))
+        variant_path <- here("simulations", "settings", setting_name, "variants", paste0(variant_name, ".R"))
         if (file.exists(variant_path)) {
             source(variant_path)
         } else {
@@ -45,18 +45,17 @@ load_simulation_settings <- function(setting_name, variant_name = NULL) {
     # Usage:
     params <- list(
         predictors = predictors,
-        measurements = measurements,
         observations = observations,
+        measurements = measurements,
         basis_functions = basis_functions,
         intercept = intercept,
         norder = norder,
-        error_sd = error_sd,
-        seed = seed,
-        noise_sd = noise_sd,
         mu_funcs = mu_funcs,
-        cov_funcs = cov_funcs,
         beta_funcs = beta_funcs,
         time_domains = time_domains,
+        cov_funcs = cov_funcs,
+        seed = seed,
+        noise_snr = noise_snr,
         true_predictors = true_predictors
     )
     # Return the environment where the settings are stored
@@ -67,19 +66,19 @@ load_simulation_settings <- function(setting_name, variant_name = NULL) {
 #' Count the number of non-zero functions in a list of functions
 #'
 #' This function takes a list of functions and counts the number of non-zero functions.
-#' 
+#'
 #' @param func_list A list of functions to be counted.
-#' 
+#'
 #' @return An integer indicating the number of non-zero functions in the list.
 #'
 #' @examples
-#' count_non_zero_functions(list(function(x) x^2, function(x) 0*x))
+#' count_non_zero_functions(list(function(x) x^2, function(x) 0 * x))
 #' # returns 1
 #'
-non_zero_betas<- function(func_list) {
+non_zero_betas <- function(func_list) {
     zero_funcs <- sapply(func_list, function(f) {
         body_text <- deparse(body(f))
-        is.zero <- grepl("0 \\*", body_text) 
+        is.zero <- grepl("0 \\*", body_text)
         # return 0 if true, 1 if false
         return(1 - is.zero)
     })

@@ -9,8 +9,7 @@ observations <- 250
 basis_functions <- 6
 intercept <- 0
 norder <- 4
-error_sd <- 0.05
-noise_sd <- 0.00
+noise_snr = c(100,100)
 seed <- 1
 beta_funcs <- list(
   function(t) {
@@ -40,6 +39,7 @@ beta_funcs <- list(
     rep(0, length(t)) # This function always returns 0 regardless of the input t
   }
 )
+
 
 mu_funcs <- list(
   function(t, args) {
