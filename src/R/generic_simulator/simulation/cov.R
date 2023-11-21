@@ -5,17 +5,23 @@ library(fda)
 source(here("src", "R",  "generic_simulator",   "utils" , "covariance_utilities.R"))
 
 simulate_cov_data <- function(mu_funcs, cov_funcs, beta_funcs, observations, time_domains, intercept, predictors, noise_snr=c(FALSE,100)) {
+  print(noise_snr)
   # Simulate functional features
-  X <- simulate_functional_features(mu_funcs, cov_funcs, observations, time_domains)
+  U <- simulate_functional_features(mu_funcs, cov_funcs, observations, time_domains)
   Betas <- create_beta_curves(beta_funcs, time_domains)
+  
+  X <- U
+  # Add noise to Y (if specified)
+  
+  X <- X + add_snr_noise( X, noise_snr[1])
 
   # Compute Y values
   Y <- compute_Y_values_generic(X, Betas, observations, predictors, time_domains, intercept)$Y
 
   # Add noise to Y (if specified)
-  if (noise_snr[2]) {
-    Y <- Y + add_snr_noise(Y, noise_snr[2])
-  }
+
+  Y <- Y + add_snr_noise(Y, noise_snr[2])
+
 
   return(list(U = NULL, X = X, Y = Y)) # U is not used in this simulation type
 }

@@ -13,7 +13,7 @@ generate_data <- function(
     mu_funcs, beta_funcs, time_domains, cov_funcs = NULL, seed = 2000,
     simulation_type = "not paper") {
 
-  set.seed(seed)
+  # set.seed(seed)
 
   # Call the appropriate data generation function based on simulation type
   if (simulation_type == "paper") {

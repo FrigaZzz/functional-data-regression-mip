@@ -11,16 +11,16 @@ simulate_paper_data <- function(mu_funcs, beta_funcs, observations, time_domains
   Betas <- create_beta_curves(beta_funcs, time_domains)
 
   X <- U
-  if(noise_snr[1] == TRUE)
-    X <- simulate_observations_Xt(X)
-
+  # if(noise_snr[1] == TRUE)
+    # X <- simulate_observations_Xt(X)
+  
   # Compute Y values
-  Y <- compute_Y_values_generic(U, Betas, observations, predictors, time_domains, intercept)$Y
+  Y <- compute_Y_values_with_func(U, Betas, observations, predictors, time_domains, intercept)$Y
 
   # Add noise to Y (if specified)
-  if(noise_snr[1] == TRUE){
-    Y <- Y + compute_amplitude_norm(Y)
-  }
+  # if(noise_snr[2] == TRUE){
+    # Y <- Y + compute_amplitude_norm(Y)
+  # }
 
   return(list(U = U, X = X, Y = Y))
 }
@@ -38,14 +38,15 @@ simulate_paper_data <- function(mu_funcs, beta_funcs, observations, time_domains
 simulate_true_predictors_Ut <- function(mu_funcs, observations, time_domains) {
   predictors = length(mu_funcs)
   measurements = length(time_domains[[1]])
-  coef_list <- list(
-    '1' = list(a1 = rnorm(observations, mean = -4, sd = 3), a2 = rnorm(observations, mean = 7, sd = 1.5)),
-    '2' = list(b1 = runif(observations, min = 3, max = 7), b2 = rnorm(observations, mean = 0, sd = 1)),
-    '3' = list(c1 = rnorm(observations, mean = -3, sd = sqrt(1.2^2)), c2 = rnorm(observations, mean = 2, sd = sqrt(0.5^2)), c3 = rnorm(observations, mean = -2, sd = 1)),
-    '4' = list(d1 = rnorm(observations, mean = -2, sd = 1), d2 = rnorm(observations, mean = 3, sd = sqrt(1.5^2))),
-    '5' = list(e1 = runif(observations, min = 2, max = 7), e2 = rnorm(observations, mean = 2, sd = sqrt(0.4^2))),
-    '6' = list(f1 = rnorm(observations, mean = 4, sd = sqrt(2^2)), f2 = rnorm(observations, mean = -3, sd = sqrt(0.5^2)), f3 = rnorm(observations, mean = 1, sd = 1))
-  )
+coef_list <- list(
+  '1' = list(a1 = rnorm(observations, mean = -5, sd = 1), a2 = rnorm(observations, mean = 7, sd = 0.5)),
+  '2' = list(b1 = runif(observations, min = 4, max = 6), b2 = rnorm(observations, mean = 0, sd = 0.5)),
+  '3' = list(c1 = rnorm(observations, mean = -3, sd = 0.6), c2 = rnorm(observations, mean = 2, sd = 0.25), c3 = rnorm(observations, mean = -2, sd = 0.5), c4 = rnorm(observations, mean = 2, sd = 0.75)),
+  '4' = list(d1 = rnorm(observations, mean = -2, sd = 0.5), d2 = rnorm(observations, mean = 3, sd = sqrt(0.75^2))),
+  '5' = list(e1 = runif(observations, min = 4, max = 5), e2 = rnorm(observations, mean = 2, sd = sqrt(0.2^2))),
+  '6' = list(f1 = rnorm(observations, mean = 4, sd = sqrt(1^2)), f2 = rnorm(observations, mean = -3, sd = sqrt(0.25^2)), f3 = rnorm(observations, mean = 1, sd = 0.5))
+)
+
 
   X <- array(0, dim = c(observations, predictors, measurements))
   # Generate the functional data for each observation and each predictor

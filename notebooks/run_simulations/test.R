@@ -1,11 +1,12 @@
 library(here)
 
-simulation_name = "2_predictors"
+simulation_name = "2_predictors_coef"
 simulation_settings_file = "default"
 # Source the generic simulator script
-source(here("src", "R", "generic_simulator", "simulate.R"))
+source(here("src", "R", "generic_simulator", "simulate_paper.R"))
 source(here("src", "R", "generic_simulator", "utils","loader_utilities.R"))
 
+set.seed(1)
 # Required inputs before running the simulation!!!
 inputs  <- load_simulation_settings(simulation_name, simulation_settings_file)
 inputs$measurements = 10
@@ -30,9 +31,9 @@ fdPar_obj <- fda::fdPar(basis)
 # result <- t(W) %*% t(basis_values)
 # J = inprod(basis, basis)
 # zi =  t(W) %*% J
-Y_my_func= compute_Y_values(U, betas, observations = observations, predictors, time_domains = inputs$time_domains, intercept=inputs$intercept)$Y
-Y2__library = compute_Y_values(U, betas, observations = observations, predictors, time_domains = inputs$time_domains, intercept=inputs$intercept)$Y
-Y2_smoothing = compute_Y_values_sm(U, betas, observations = observations, predictors, time_domains = inputs$time_domains, intercept=inputs$intercept)$Y
+# Y_my_func= compute_Y_values(U, betas, observations = observations, predictors, time_domains = inputs$time_domains, intercept=inputs$intercept)$Y
+# Y2__library = compute_Y_values(U, betas, observations = observations, predictors, time_domains = inputs$time_domains, intercept=inputs$intercept)$Y
+Y = compute_Y_values_with_func(U, betas, observations = observations, predictors, time_domains = inputs$time_domains, intercept=inputs$intercept)$Y
 
 # merge 
 time_domains = inputs$time_domains

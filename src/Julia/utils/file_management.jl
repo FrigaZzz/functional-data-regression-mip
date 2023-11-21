@@ -26,7 +26,7 @@ function parse_command_line_arguments(args)
     seed = parse(Int, args[10])
     λ = parse(Float64, args[11])  # Assuming λ is a floating point number
     λ_group = parse(Float64, args[12])  # Assuming λ_group is a floating point number
-    M = parse(Int, args[13])
+    M = parse(Float64, args[13])  # Changed from Int to Float64
     return model_name, simulation_name, setting_name, measurements, observations, observations_test, basis_functions, noise_snr, seed, λ, λ_group, M
 end
 """
@@ -74,9 +74,9 @@ julia> define_output_dir("SimY", 200, 50, 5, 100, 0.01, 0.02, 10, 0.1, 12345, "p
 "path/to/project/outputs/runs/SimY/200_50_5_100_0.01_0.02_10_0.1_12345"
 ```
 """
-function define_output_dir(model_name, simulation_name, observations, observations_test, basis_functions, measurements, lambda, lambda_group, M, error_sd, seed, project_root)
+function define_output_dir(model_name, simulation_name, setting_name, observations, observations_test, basis_functions, measurements, lambda, lambda_group, M, error_sd, seed, project_root)
     # Define directory structure
-    folder_name = "$(simulation_name)/$(model_name)/$(observations)_$(observations_test)_$(basis_functions)_$(measurements)_$(lambda)_$(lambda_group)_$(M)_$(error_sd)_$(seed)"
+    folder_name = "$(simulation_name)/$(model_name)/$(setting_name)/$(observations)_$(observations_test)_$(basis_functions)_$(measurements)_$(lambda)_$(lambda_group)_$(M)_$(error_sd)_$(seed)"
     output_dir = joinpath(project_root, "outputs", "runs", folder_name)
     return output_dir
 end

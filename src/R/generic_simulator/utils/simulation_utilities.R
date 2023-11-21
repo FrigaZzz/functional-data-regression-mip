@@ -67,12 +67,11 @@ compute_Y_values_generic <- function(X_data, beta_curves, observations, predicto
   basis_list <- lapply(time_domains, function(td) {
     create.bspline.basis(rangeval = c(min(td), max(td)), nbasis = basis_functions)
   })
-
+  print(predictors)
   # Smooth beta_curves
   beta_fd_list <- lapply(1:predictors, function(j) {
     smooth.basis(time_domains[[j]], beta_curves[j, ], basis_list[[j]])$fd
   })
-
   # Compute Y values for each observation
   for (i in 1:observations) {
     Y[i] <- intercept

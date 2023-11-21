@@ -20,7 +20,7 @@ function run_model_and_save_outputs(model_name, simulation_name, setting_name, o
     )
 
 
-    output_dir = define_output_dir(model_name, simulation_name, observations, observations_test, basis_functions, measurements, λ, λ_group, M, noise_snr, seed, project_root)
+    output_dir = define_output_dir(model_name, simulation_name, setting_name, observations, observations_test, basis_functions, measurements, λ, λ_group, M, noise_snr, seed, project_root)
     ensure_directory_exists(output_dir)
 
 

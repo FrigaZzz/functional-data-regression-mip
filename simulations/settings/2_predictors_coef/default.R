@@ -2,15 +2,16 @@
 # Parameter definitions for a simulation with 3 predictors.
 
 beta_funcs <- list(
-  function(t) (2 * t) + 1,
-  function(t) rep(0, length(t)) 
+  function(t) 4 *t ,
+  function(t) rep(0, length(t))
 )
 true_predictors <- c(1,0)
+simulation_type = "paper"
 
 predictors <- 2
 measurements <- 100
 observations <- 200
-basis_functions = 6
+basis_functions = 8
 intercept = 0
 norder = 4
 noise_snr = c(100,100)
@@ -22,7 +23,6 @@ mu_funcs <- list(
         
     },
     function(t,args) {
-
         args$b1 * sin(pi * t) + args$b2
     }
 )
