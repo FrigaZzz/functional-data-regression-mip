@@ -47,7 +47,7 @@ function load_simulation_data(simulation_name, simulation_settings_file, project
     @rput runner_file_path
     @rput overrides
     R"""
-
+        set.seed(overrides$seed)
         source(runner_file_path)
         for (param_name in names(overrides)) {
             inputs[[param_name]] <- overrides[[param_name]]

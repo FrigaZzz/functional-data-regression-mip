@@ -1,7 +1,7 @@
 using JuMP
 using Gurobi
 
-function mip_functional_regression(Y, Z, lambda, lambda_group, BIG_M, intercept = false , group_limit=Inf)
+function mip_functional_regression(Y, Z, lambda, lambda_group, BIG_M; intercept = false , group_limit=Inf)
     n, p, r = size(Z)
     group_limit = min(group_limit, p)
     # MIP parameters
@@ -10,11 +10,11 @@ function mip_functional_regression(Y, Z, lambda, lambda_group, BIG_M, intercept 
     # Create a model
     model = Model(optimizer_with_attributes(Gurobi.Optimizer, "TimeLimit" => maxtime,
                                             "OutputFlag" => out, "Presolve" => 2,
-                                            "Heuristics" => 0, "MIPGap" => 0.000005,
+                                            "Heuristics" => 0, "MIPGap" => 0.05,
                                             "Threads" => 1, "MIPFocus" => 0,
                                             "NumericFocus" => 1, "NonConvex" => 2,
-                                            "OptimalityTol" => 0.0001, "IntFeasTol" => 1e-9,
-                                            "FeasibilityTol" => 1e-9))
+                                            "OptimalityTol" => 0.01, "IntFeasTol" => 1e-5,
+                                            "FeasibilityTol" => 1e-5))
 
 
 
@@ -30,10 +30,9 @@ function mip_functional_regression(Y, Z, lambda, lambda_group, BIG_M, intercept 
         alpha = 0
     end
 
-    # Set up the objective function
-    @objective(model, Min, sum((Y[i] - alpha - sum(Z[i, j, : ]' * beta[j,:] for j in 1:p))^2 for i in 1:n) +
-                           lambda * sum(beta_nonzero[j, k] for j in 1:p, k in 1:r) +  # L0 norm term
-                           lambda_group * sum(group[j] for j in 1:p))  # Group sparsity term
+    @objective(model, Min, sum((Y[i] - alpha - sum(Z[i, j, :]' * beta[j,:] for j in 1:p))^2 for i in 1:n) +
+    lambda * sum(beta_nonzero[j, k] for j in 1:p, k in 1:r) +  # L0 norm term
+    lambda_group * sum(group[j] for j in 1:p))  # Group sparsity term
 
     for j in 1:p
         # Constraints to link the binary variables with the beta coefficients

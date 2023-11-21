@@ -15,11 +15,11 @@ function mip_functional_regression(Y, Z, lambda, lambda_group, BIG_M; intercept=
     # Create a model
     model = Model(optimizer_with_attributes(Gurobi.Optimizer, "TimeLimit" => maxtime,
         "OutputFlag" => out, "Presolve" => 2,
-        "Heuristics" => 0, "MIPGap" => 0.000005,
+        "Heuristics" => 0, "MIPGap" => 0.05,
         "Threads" => 1, "MIPFocus" => 0,
         "NumericFocus" => 1, "NonConvex" => 2,
-        "OptimalityTol" => 0.0001, "IntFeasTol" => 1e-9,
-        "FeasibilityTol" => 1e-9))
+        "OptimalityTol" => 0.01, "IntFeasTol" => 1e-5,
+        "FeasibilityTol" => 1e-5))
 
     # Define variables
     @variable(model, beta[1:p, 1:r])

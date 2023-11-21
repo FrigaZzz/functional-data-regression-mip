@@ -11,6 +11,9 @@ intercept <- 0
 norder <- 4
 noise_snr = c(100,100)
 seed <- 1
+
+simulation_type = "paper"
+
 beta_funcs <- list(
   function(t) {
     sin(t)
@@ -61,6 +64,15 @@ mu_funcs <- list(
     args$f1 * exp(-t / 3) + args$f2 * t + args$f3
   }
 )
+
+# time_domains <- list(
+#   list(0, 1),
+#   list(0, 1),
+#   list(0, 1),
+#   list(0, 1),
+#   list(0, 1),
+#   list(0, 1)
+# )
 
 time_domains <- list(
   list(0, 1),

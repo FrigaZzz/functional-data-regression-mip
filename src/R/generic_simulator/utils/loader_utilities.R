@@ -42,6 +42,10 @@ load_simulation_settings <- function(setting_name, variant_name = NULL) {
     if (!exists("true_predictors")) {
         true_predictors <- non_zero_betas(beta_funcs)
     }
+    # check if true_predictors exists
+    if (!exists("simulation_type")) {
+        simulation_type <- "non paper"
+    }
     # Usage:
     params <- list(
         predictors = predictors,
@@ -56,7 +60,8 @@ load_simulation_settings <- function(setting_name, variant_name = NULL) {
         cov_funcs = cov_funcs,
         seed = seed,
         noise_snr = noise_snr,
-        true_predictors = true_predictors
+        true_predictors = true_predictors,
+        simulation_type = simulation_type
     )
     # Return the environment where the settings are stored
     return(params)

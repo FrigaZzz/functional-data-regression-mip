@@ -22,8 +22,8 @@ library(fda)
 #' W <- compute_W_matrix_generic(FX, num_basis = 6, time_domains, basis_obj_list)
 #'
 compute_W_matrix_generic <- function(FX, num_basis, time_domains, basis_obj_list) {
-  num_predictors <- dim(FX)[2]
   num_observations <- dim(FX)[1]
+  num_predictors <- dim(FX)[2]
   num_basis <- num_basis
   
   # Initialize a 3D array to store the B-spline coefficients
@@ -118,7 +118,7 @@ compute_Z_matrix_generic <- function(W_array, J, predictors, basis_functions) {
     col_index <- 1 
     for (m in seq_len(predictors)) {
       # Compute the product of W and J for each predictor
-      wj_i <- W_array[i,m , ] %*% J[m, , ] 
+      wj_i <- t(W_array[i,m , ]) %*% J[m, , ] 
       # Insert the product into the Z_matrix
       Z_matrix[i, col_index:(col_index + basis_functions - 1)] <- wj_i
       # Update the column index
@@ -134,4 +134,5 @@ compute_Z_matrix_generic <- function(W_array, J, predictors, basis_functions) {
   }
   return(Z_matrix_out)
 }
+
 

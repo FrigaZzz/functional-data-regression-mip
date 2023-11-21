@@ -1,4 +1,2 @@
-model_name,simulation_name,measurements,observations,observations_test,basis_functions,error_sd,seed,λ,λ_group,M
-l0_and_limit.jl,5_predictors_setting,50,500,250,5,0.1,1,0.1,0.001,1000
-l0_and_limit.jl,10_predictors_setting,100,1000,400,5,0.2,1,0.1,0.001,1000
-l0_and_limit.jl,15_predictors_setting,500,1500,800,5,0.3,1,0.1,0.001,1000
+model_name,simulation_name,setting_name,measurements,observations,observations_test,basis_functions,noise,snr,seed,λ,λ_group,M
+l0_limit,paper,default,50,250,100,6,false,100,1,0,0,2

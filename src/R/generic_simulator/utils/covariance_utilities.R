@@ -16,6 +16,10 @@ generate_covariance_function <- function(sig2, rho, decay_type = "exponential") 
     } else if (decay_type == "matern") {
       return(sig2 * (1 + sqrt(5) * d / rho) * exp(-sqrt(5) * d / rho))
     }
+    else if (decay_type == "absolute_difference") {
+      decay_factor = 0.5
+      return(decay_factor ^ d)
+    }
   }
 }
 

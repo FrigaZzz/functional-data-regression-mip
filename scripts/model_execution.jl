@@ -1,4 +1,6 @@
 
+
+
 # Modified run_model_and_save_outputs function
 function run_model_and_save_outputs(model_name, simulation_name, setting_name, observations, observations_test, measurements, basis_functions, noise_snr, seed, λ, λ_group, M)
     # Include model file
@@ -11,7 +13,7 @@ function run_model_and_save_outputs(model_name, simulation_name, setting_name, o
         train_data[:Y], train_data[:intercept], train_data[:Z], train_data[:B], train_data[:predictors], train_data[:true_predictors]
     )
 
-    test_data = load_simulation_data(simulation_name, setting_name, project_root; observations = observations_test, measurements = measurements, basis_functions = basis_functions, noise_snr = noise_snr, seed = seed) 
+    test_data = load_simulation_data(simulation_name, setting_name, project_root; observations = observations_test, measurements = measurements, basis_functions = basis_functions, noise_snr = noise_snr, seed = seed + 1) 
 
     Y_test, Z_test = (
         test_data[:Y], test_data[:Z]
@@ -26,7 +28,7 @@ function run_model_and_save_outputs(model_name, simulation_name, setting_name, o
 
     to_predict = sum(true_predictors_train)
     intercept = train_data[:intercept]
-    beta_star, alpha, groups = mip_functional_regression(Y_train, Z_train, λ, λ_group, M, intercept != 0 , to_predict)
+    beta_star, alpha, groups = mip_functional_regression(Y_train, Z_train, λ, λ_group, M; intercept = intercept != 0 , group_limit = to_predict)
 
     # Compute Metrics and save to file
     performance_metrics = compute_metrics(Y_test, Z_test, beta_matrix_train, beta_star, alpha, groups, to_predict)
@@ -66,7 +68,13 @@ function run_model_and_save_outputs(model_name, simulation_name, setting_name, o
     )
     save_model_results(output_dir, model_results)
 
+    output_image_path = joinpath(output_dir, "curves")
+    plots_path = joinpath(output_dir, "plots")
 
+    plot_combined_predicted_curve(train_data[:beta_point_values], beta_star, train_data[:basis_values],train_data[:time_domains], output_image_path, false)
+    generate_and_save_plots(train_data[:X], test_data[:X], Y_train, Y_test, train_data[:basis_values], train_data[:W], test_data[:W], Z_train, Z_test,plots_path)
+    Y_pred = get_predictions(Z_test, beta_star, alpha)
+    save_plots(Y_test, Y_pred, Z_test, beta_star, alpha, observations,plots_path)
 end
 project_root = dirname(@__DIR__)
 
@@ -78,13 +86,14 @@ include(joinpath(project_root, "src", "Julia", "models", model_name))
 include(joinpath(project_root, "src", "Julia", "utils", "simulation.jl"))
 include(joinpath(project_root, "src", "Julia", "utils", "file_management.jl"))
 include(joinpath(project_root, "src", "Julia", "utils", "data_analysis.jl"))
+include(joinpath(project_root, "src", "Julia", "utils", "plot.jl"))
 
 
 if isempty(ARGS)
     # Predefined values
-    run_model_and_save_outputs("l0_limit", "3_predictors", "default", 2500, 500, 250, 6, [100,100], 1, 0.01, 0.001, 1000)
+    run_model_and_save_outputs("l0_limit", "3_predictors", "default", 2500, 500, 250, 6, [false,100], 1, 0.01, 0.001, 1000)
 
 else
     # Values from command-line arguments
-    run_model_and_save_outputs(parse_command_line_arguments(ARGS))
+    run_model_and_save_outputs(parse_command_line_arguments(ARGS)...)
 end

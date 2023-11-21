@@ -8,9 +8,9 @@ beta_funcs <- list(
 true_predictors <- c(1,0)
 
 predictors <- 2
-measurements <- 50
-observations <- 5000
-basis_functions = 5
+measurements <- 100
+observations <- 200
+basis_functions = 6
 intercept = 0
 norder = 4
 noise_snr = c(100,100)
@@ -18,7 +18,7 @@ seed = 1
 
 mu_funcs <- list(
    function(t,args) {
-      cos( pi * (t - args$a1)) + args$a2
+      cos( pi * (t - args$a1)) 
         
     },
     function(t,args) {
@@ -30,6 +30,6 @@ mu_funcs <- list(
 cov_funcs <- NULL
 
 time_domains = list(
-  list(0,  pi / 2),
-  list(0, pi / 2)
+  list(0,  1),
+  list(0, 1)
 )

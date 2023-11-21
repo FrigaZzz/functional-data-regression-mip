@@ -44,15 +44,14 @@ generate_data <- function(
   Betas <- create_beta_curves(beta_funcs,  time_domains)
 
   # Apply amplitude normalization to get observed features
-  X <-  simulate_observations_Xt(U)
-  # X <-  apply_snr_to_X(U, noise_snr[1])
-
-  # Simulate observed Y values 
-  Y <- compute_Y_values(X, Betas, observations, predictors,  intercept)$Y
+  # X <-  simulate_observations_Xt(U) # adds the modulation
+  # X <-  apply_snr_to_X(X, noise_snr[1])
+  # copy U in X
+  X <- U
+  Y <- compute_Y_values(U, Betas, observations, predictors,time_domains, intercept)$Y
 
   # Apply error terms to Y values
-  Y <- Y + compute_amplitude_norm(Y)
-  # Y <- Y + add_snr_noise(Y, noise_snr[2])
+  # Y <- Y + compute_amplitude_norm(Y) # adds the modulation
 
 
   # 2. Create B-spline basis object
@@ -68,7 +67,7 @@ generate_data <- function(
   J <- compute_J_matrix_generic(basis_objs, predictors, basis_functions)
 
   # 5. W_array: Expand X functional data into B-spline basis
-  W <- compute_W_matrix_generic(X, basis_functions, time_domains, basis_objs)
+  W <- compute_W_matrix_generic(U, basis_functions, time_domains, basis_objs)
 
   # 6. Compute Z matrix: Z = W %*% J 
   Z_matrix <- compute_Z_matrix_generic(W, J, predictors, basis_functions)

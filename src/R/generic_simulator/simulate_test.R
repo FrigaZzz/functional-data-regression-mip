@@ -43,7 +43,7 @@ generate_data <- function(
 
   # Apply amplitude normalization to get observed features
   # X <-  simulate_observations_Xt(U)
-  X <-  apply_snr_to_X(X, noise_snr[1])
+  # X <-  apply_snr_to_X(X, noise_snr[1])
   # Simulate observed Y values 
   Y <- compute_Y_values(X, Betas, observations, predictors,time_domains, intercept)$Y
 

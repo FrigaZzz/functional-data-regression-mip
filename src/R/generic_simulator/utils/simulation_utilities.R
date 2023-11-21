@@ -3,94 +3,10 @@ library(here)
 library(fda)
 
 source(here("src", "R",  "generic_simulator",   "utils" , "covariance_utilities.R"))
-
-#' Simulate data
-#' This function generates simulated data based on a mean function and a covariance function.
-#' 
-#' @param mu_func a function that takes in a time domain and returns the mean function evaluated at each time point.
-#' @param cov_func_data a list containing the covariance function parameters: sig2, rho, and decay_type.
-#' @param time_domain a vector of time points at which to evaluate the mean and covariance functions.
-#' @param n the number of samples to generate.
-#' 
-#' @return A matrix of simulated data with n rows and length(time_domain) columns.
-simulate_data <- function(mu_func, cov_func_data, time_domain, n) {
-  mu <- mu_func(time_domain)
-  # extract sig2, rho, decay_type from cov_func_data
-  sig2 <- cov_func_data[[1]]
-  rho <- cov_func_data[[2]]
-  decay_type <- cov_func_data[[3]]
-  
-  Sigma <- generate_covariance_function(sig2, rho, decay_type)(time_domain, time_domain)
-  MASS::mvrnorm(n, mu, Sigma)
-}
+source(here("src", "R",  "generic_simulator",   "simulation" , "cov.R"))
+source(here("src", "R",  "generic_simulator",   "simulation" , "paper.R"))
 
 
-#' Simulate functional features
-#'
-#' This function simulates functional features based on the provided mean and covariance functions.
-#' 
-#' @param mu_funcs A list of mean functions.
-#' @param cov_funcs_data A list of covariance functions.
-#' @param n The number of observations to simulate.
-#' @param time_domains A list of time domains for each functional feature.
-#' @return A 3D array of simulated functional features.
-#' 
-#' @examples
-#' # Simulate 100 observations of 2 functional features with mean functions mu1 and mu2, and covariance functions cov1 and cov2
-#' time_domains <- list(seq(0, 1, length.out = 10), seq(0, 1, length.out = 20))
-#' mu_funcs <- list(mu1, mu2)
-#' cov_funcs_data <- list(cov1, cov2)
-#' simulate_functional_features(mu_funcs, cov_funcs_data, 100, time_domains)
-#' 
-simulate_functional_features <- function(mu_funcs, cov_funcs_data, observations, time_domains) {
-  X_list = Map(simulate_data, mu_funcs, cov_funcs_data, time_domains, MoreArgs = list(n = observations))
-
-  predictors = length(mu_funcs)
-  X <- array(0, dim = c(observations, predictors,  length(time_domains[[1]])))
-
-  # Fill the 3D array with data from simulated_features
-  for (i in 1:predictors) {
-    X[, i, ] <- X_list[[i]]
-  }
-  return(X)
-}
-
-
-#' 
-#' This function simulates functional features for the paper using the provided mean functions,  number of observations and time domains.
-#' 
-#' @param mu_funcs A list of mean functions.
-#' @param observations The number of observations.
-#' @param time_domains A list of time domains.
-#' 
-#' @return An array of simulated functional features.
-#' 
-simulate_true_predictors_Ut <- function(mu_funcs, observations, time_domains) {
-  predictors = length(mu_funcs)
-  measurements = length(time_domains[[1]])
-  coef_list <- list(
-    '1' = list(a1 = rnorm(observations, mean = -4, sd = 3), a2 = rnorm(observations, mean = 7, sd = 1.5)),
-    '2' = list(b1 = runif(observations, min = 3, max = 7), b2 = rnorm(observations, mean = 0, sd = 1)),
-    '3' = list(c1 = rnorm(observations, mean = -3, sd = sqrt(1.2^2)), c2 = rnorm(observations, mean = 2, sd = sqrt(0.5^2)), c3 = rnorm(observations, mean = -2, sd = 1)),
-    '4' = list(d1 = rnorm(observations, mean = -2, sd = 1), d2 = rnorm(observations, mean = 3, sd = sqrt(1.5^2))),
-    '5' = list(e1 = runif(observations, min = 2, max = 7), e2 = rnorm(observations, mean = 2, sd = sqrt(0.4^2))),
-    '6' = list(f1 = rnorm(observations, mean = 4, sd = sqrt(2^2)), f2 = rnorm(observations, mean = -3, sd = sqrt(0.5^2)), f3 = rnorm(observations, mean = 1, sd = 1))
-  )
-
-  X <- array(0, dim = c(observations, predictors, measurements))
-  # Generate the functional data for each observation and each predictor
-  for (i in 1:n) {
-    for (j in 1:predictors) {
-      # Extract the coefficients for the j-th predictor of the i-th observation
-      current_coefs <- lapply(coef_list[[j]], function(row) row[i])
-      # Apply the mu_funcs function with the time domain for the j-th predictor
-      # and the current coefficients for the i-th observation
-      X[i, j, ] <- mu_funcs[[j]](time_domains[[j]], current_coefs)
-    }
-  }
-  
-  return(X)
-}
 
 
 #' Create Beta Curves
@@ -110,42 +26,7 @@ create_beta_curves <- function(beta_funcs, time_domains) {
 }
 
 
-#' Apply amplitude normalization to predictor data and add random error terms
-#'
-#' This function applies amplitude normalization to the predictor data and adds random error terms to it.
-#' 
-#' @param X array of predictor data
-#' @param observations number of observations
-#' @param predictors number of predictors
-#' @return An array of predictor data with added error terms.
-simulate_observations_Xt <- function(X) {
-  measurements <- dim(X)[3]
-  predictors <- dim(X)[2]
-  observations <- dim(X)[1]
-  # Initialize the array for the normalized functional covariates
-  FX <- array(0, dim = c(observations, predictors, measurements))
 
-  for (i in 1:observations) {
-    for (m in 1:predictors) {
-      # Retrieve the functional values for predictor m and observation i
-      u_values <- X[i, m, ]
-      
-      # Calculate the range for this set of functional values
-      RY <- max(u_values) - min(u_values)
-      
-      # Calculate the standard deviation of the error term based on the range
-      sd_epsilon <- (0.025 * RY)
-      
-      # Generate the error term for this observation and predictor
-      epsilon_im <- rnorm(measurements, mean = 0, sd = sd_epsilon)
-      
-      # Add the error term to the functional covariate
-      FX[i, m, ] <- u_values + epsilon_im
-    }
-  }
-  
-  return(FX)
-}
 
 #' Add SNR Noise to Signal
 #'
@@ -178,19 +59,9 @@ apply_snr_to_X <- function(X, snr_db = 100) {
 }
 
 #' Compute Y Values
-#'
-#' Computes Y values (response variable) using functional data, beta curves, and other parameters.
-#'
-#' @param X_data Functional data for predictors.
-#' @param beta_curves Beta curves for predictors.
-#' @param observations Number of observations.
-#' @param predictors Number of predictors.
-#' @param time_domains Time domains for predictors.
-#' @param intercept Intercept value for Y computation.
-#' @return List containing computed Y values.
-compute_Y_values <- function(X_data, beta_curves, observations, predictors, time_domains, intercept = 0) {
+compute_Y_values_generic <- function(X_data, beta_curves, observations, predictors, time_domains, intercept = 0, coef_list = null) {
   Y <- numeric(observations)
-  basis_functions <- 6
+  basis_functions <- 10
 
   # Create basis functions for each predictor
   basis_list <- lapply(time_domains, function(td) {
@@ -207,10 +78,10 @@ compute_Y_values <- function(X_data, beta_curves, observations, predictors, time
     Y[i] <- intercept
     for (j in 1:predictors) {
       # Extract the time series for the current observation and predictor
-      current_series <- X_data[i, j, ]
+      current_predictor <- X_data[i, j, ]
 
       # Smooth the current series into a functional data object
-      X_fd <- smooth.basis(time_domains[[j]], current_series, basis_list[[j]])$fd
+      X_fd <- smooth.basis(time_domains[[j]], current_predictor, basis_list[[j]])$fd
 
       # Compute the product of X_fd and beta_fd as a new functional data object
       product_fd <- X_fd * beta_fd_list[[j]]
@@ -228,45 +99,65 @@ compute_Y_values <- function(X_data, beta_curves, observations, predictors, time
 
 
 
+compute_Y_values_with_func <- function(X_data, beta_curves, observations, predictors, time_domains, intercept = 0) {
+  Y <- numeric(observations)
 
-#' Compute amplitude normalization factor for functional data regression
-#'
-#' This function computes the amplitude normalization factor for functional data regression.
-#' The function takes in a vector of observations Y and an error standard deviation error_sd.
-#' It returns a vector of random errors Epsilon with the same length as Y.
-#'
-#' @param Y A vector of observations
-#' @param error_sd The standard deviation of the error term
-#' 
-#' @return A vector of random errors Epsilon with the same length as Y
-#'
-#' @examples
-#' Y <- rnorm(100)
-#' compute_amplitude_norm(Y, error_sd = 0.05)
-#'
-compute_amplitude_norm<- function(Y, error_sd = 0.05) {
-  observations <- length(Y)
-  Epsilon <- numeric(observations)
-  Ry <- max(Y) - min(Y)  # Calculate the range of Y
-  Epsilon <- rnorm(observations, mean = 0, sd = (error_sd * Ry))
-  return(Epsilon)
+  for (i in 1:observations) {
+    Y[i] <- intercept
+    for (j in 1:predictors) {
+      current_series <- X_data[i, j, ]
+      beta_series <- beta_curves[j, ]
+      td <- time_domains[[j]]
+      prod = current_series * beta_series
+      area = trapz(td, prod)
+      Y[i] <- Y[i] + area
+    }
+  }
+
+  return(list(Y = Y))
 }
 
-#' Compute noise for a given set of observations
-#'
-#' This function generates random noise for a given set of observations.
-#' The noise is generated from a normal distribution with mean 0 and standard deviation error_sd.
-#'
-#' @param Y A numeric vector of observations
-#' @param error_sd A numeric value representing the standard deviation of the error term
-#'
-#' @return A numeric vector of random noise
-#'
-#'
-compute_noise <- function(Y, error_sd = 0.05) {
-  observations <- length(Y)
-  noise <- rnorm(observations, mean = 0, sd = error_sd)
-  return(noise)
+# when times in time domains are not equidistant
+compute_Y_values_generic_ <- function(X_data, beta_curves, observations, predictors, time_domains, intercept = 0) {
+  # Initialize the response vector
+  Y <- numeric(observations)
+  
+  # Loop through each observation
+  for (i in 1:observations) {
+    # Start with the intercept for each Y[i]
+    Y[i] <- intercept
+    
+    # Loop through each predictor
+    for (j in 1:predictors) {
+      # Extract the time series and beta values for the current observation and predictor
+      current_series <- X_data[i, j, ]
+      beta_series <- beta_curves[j, ]
+      
+      # Extract the time domain for the current predictor
+      td <- time_domains[[j]]
+      
+      # Initialize integral approximation for this predictor
+      integral_approximation <- 0
+      
+      # Loop through the time domain points
+      for (k in 1:(length(td) - 1)) {
+        # Calculate the non-uniform width of the current trapezoid
+        h_k <- td[k + 1] - td[k]
+        
+        # Calculate the average height of the current trapezoid
+        average_height <- (current_series[k] * beta_series[k] + current_series[k + 1] * beta_series[k + 1]) / 2
+        
+        # Add the area of the current trapezoid to the integral approximation
+        integral_approximation <- integral_approximation + h_k * average_height
+      }
+      
+      # Update Y[i] with the contribution from the current predictor
+      Y[i] <- Y[i] + integral_approximation
+    }
+  }
+  
+  # Return the computed Y values
+  return(list(Y = Y))
 }
 
 
@@ -300,4 +191,52 @@ add_snr_noise <- function(Y, snr_db = 0) {
 
 
   return(Epsilon)
+}
+
+
+
+#' Compute noise for a given set of observations
+#'
+#' This function generates random noise for a given set of observations.
+#' The noise is generated from a normal distribution with mean 0 and standard deviation error_sd.
+#'
+#' @param Y A numeric vector of observations
+#' @param error_sd A numeric value representing the standard deviation of the error term
+#'
+#' @return A numeric vector of random noise
+#'
+#'
+compute_noise <- function(Y, error_sd = 0.05) {
+  observations <- length(Y)
+  noise <- rnorm(observations, mean = 0, sd = error_sd)
+  return(noise)
+}
+
+
+
+trapz <- function(x, y) {
+    if (missing(y)) {
+        if (length(x) == 0) return(0)
+        y <- x
+        x <- seq(along=x)
+    }
+    if (length(x) == 0 && length(y) == 0) return(0)
+    if (!(is.numeric(x) || is.complex(x)) ||
+            !(is.numeric(y) || is.complex(y)) )
+        stop("Arguments 'x' and 'y' must be real or complex vectors.")
+    m <- length(x)
+    if (length(y) != m)
+        stop("Arguments 'x', 'y' must be vectors of the same length.")
+    if (m <= 1) return(0.0)
+
+    # z <- sum((x[2:m] - x[1:(m-1)]) * (y[1:(m-1)] + y[2:m]))
+    # return(0.5 * z)
+
+    xp <- c(x, x[m:1])
+    yp <- c(numeric(m), y[m:1])
+    n <- 2*m
+    p1 <- sum(xp[1:(n-1)]*yp[2:n]) + xp[n]*yp[1]
+    p2 <- sum(xp[2:n]*yp[1:(n-1)]) + xp[1]*yp[n]
+
+    return(0.5*(p1-p2))
 }
