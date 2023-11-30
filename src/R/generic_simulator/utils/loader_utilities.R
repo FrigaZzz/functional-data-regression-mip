@@ -38,10 +38,7 @@ load_simulation_settings <- function(setting_name, variant_name = NULL) {
             warning("Variant settings file does not exist: ", variant_path)
         }
     }
-    # check if true_predictors exists
-    if (!exists("true_predictors")) {
-        true_predictors <- non_zero_betas(beta_funcs)
-    }
+
     # check if true_predictors exists
     if (!exists("simulation_type")) {
         simulation_type <- "non paper"
@@ -68,24 +65,3 @@ load_simulation_settings <- function(setting_name, variant_name = NULL) {
 }
 
 
-#' Count the number of non-zero functions in a list of functions
-#'
-#' This function takes a list of functions and counts the number of non-zero functions.
-#'
-#' @param func_list A list of functions to be counted.
-#'
-#' @return An integer indicating the number of non-zero functions in the list.
-#'
-#' @examples
-#' count_non_zero_functions(list(function(x) x^2, function(x) 0 * x))
-#' # returns 1
-#'
-non_zero_betas <- function(func_list) {
-    zero_funcs <- sapply(func_list, function(f) {
-        body_text <- deparse(body(f))
-        is.zero <- grepl("0 \\*", body_text)
-        # return 0 if true, 1 if false
-        return(1 - is.zero)
-    })
-    return(zero_funcs)
-}

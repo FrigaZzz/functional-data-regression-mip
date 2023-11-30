@@ -28,7 +28,9 @@ function run_model_and_save_outputs(model_name, simulation_name, setting_name, o
 
     to_predict = sum(true_predictors_train)
     intercept = train_data[:intercept]
-    beta_star, alpha, groups = mip_functional_regression(Y_train, Z_train, λ, λ_group, M; intercept = intercept != 0 , group_limit = to_predict)
+    big_Ms = maximum(abs.(beta_matrix_train), dims=2)
+
+    beta_star, alpha, groups = mip_functional_regression(Y_train, Z_train, λ, λ_group, big_Ms; intercept = intercept != 0 , group_limit = to_predict)
 
     # Compute Metrics and save to file
     performance_metrics = compute_metrics(Y_test, Z_test, beta_matrix_train, beta_star, alpha, groups, to_predict)

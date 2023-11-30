@@ -59,7 +59,7 @@ apply_snr_to_X <- function(X, snr_db = 100) {
 }
 
 #' Compute Y Values
-compute_Y_values_generic <- function(X_data, beta_curves, observations, predictors, time_domains, intercept = 0, coef_list = null) {
+compute_Y_values_smoothed <- function(X_data, beta_curves, observations, predictors, time_domains, intercept = 0, coef_list = null) {
   Y <- numeric(observations)
   basis_functions <- 10
 
@@ -67,7 +67,6 @@ compute_Y_values_generic <- function(X_data, beta_curves, observations, predicto
   basis_list <- lapply(time_domains, function(td) {
     create.bspline.basis(rangeval = c(min(td), max(td)), nbasis = basis_functions)
   })
-  print(predictors)
   # Smooth beta_curves
   beta_fd_list <- lapply(1:predictors, function(j) {
     smooth.basis(time_domains[[j]], beta_curves[j, ], basis_list[[j]])$fd
@@ -173,12 +172,9 @@ compute_Y_values_generic_ <- function(X_data, beta_curves, observations, predict
 #'
 #' @return Returns the original signal `Y` with added noise. The resulting noisy signal has an SNR approximately equal to the specified `snr_db`.
 #'
-add_snr_noise <- function(Y, snr_db = 0) {
+add_snr_noise <- function(Y, snr_linear = 5) {
   # Calculate the power of the signal
   signal_power <- var(Y)
-
-  # Convert SNR from dB to linear scale
-  snr_linear <- 10^(snr_db / 10)
 
   # Calculate the required noise power
   noise_power <- signal_power / snr_linear

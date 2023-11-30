@@ -25,19 +25,17 @@ run_simulation <- function(params) {
 }
 
 
-simulation_name = "3_predictors"
+simulation_name = "paper"
 simulation_settings_file = "default"
 # Required inputs before running the simulation!!!
 inputs  <- load_simulation_settings(simulation_name, simulation_settings_file)
-param_name = "measurements"
-inputs[[param_name]] <- 500
-inputs$observations <- 120
+inputs$measurements <- 100
+inputs$observations <- 400
 inputs$basis_functions <- 6
 time_domains_eval <- lapply(inputs$time_domains, function(domain) {
            seq(from = domain[[1]], to = domain[[2]], length.out = inputs$measurements)
        })
 inputs$time_domains <- time_domains_eval
 inputs$noise_snr <- c(FALSE,100)
-inputs$simulation_type <- "non paper"
 outputs <- run_simulation(inputs);
 

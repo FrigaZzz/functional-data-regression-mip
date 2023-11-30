@@ -17,31 +17,46 @@ Plot the combined predicted curve for γ_matrix and γ_star.
 - `nothing`
 
 """
-function plot_combined_predicted_curve(beta_point_values::Any, γ_star::Any, basis_values::Any, time_domains::Array, folder_path::Any, show_plot::Any=false)
-
+function plot_combined_predicted_curve(beta_point_values::Any, γ_star::Any, basis_values::Any, time_domains::Array, folder_path::Any, show_plot::Any=false;  upper_bound = nothing, lower_bound = nothing)
     mkpath(folder_path)  # Ensure the plots directory exists
     rm(folder_path, recursive=true)  # Clear the directory
     mkpath(folder_path)  # Recreate the directory
-    predictors =  size(γ_star, 1)
+    predictors = size(γ_star, 1)
+
+    # Calculate the number of rows for the layout based on the number of predictors
+    n_rows = ceil(Int, predictors / 3)
+    p = plot(layout = grid(n_rows, 3))  # Define a grid layout with 3 plots per row
+
     for j in 1:predictors  # Loop over all curves
         curr_basis = basis_values[j,:,:]
-        # reshape curr_basis
         combined_curve_matrix = beta_point_values[j, :]
         combined_curve_star = curr_basis * γ_star[j, :]
         
-        
-        # Plot the combined predicted curve for γ_matrix and γ_star
-        p = plot(time_domains[[j]], combined_curve_matrix, label="γ_matrix", color=:blue)
-        plot!(p,time_domains[[j]], combined_curve_star, label="γ_predicted", color=:red, linestyle=:dash)
-        
+        # Standardized time domain for plotting
+        real_time = time_domains[j, :] 
 
-        if(show_plot)
-            display(p)
+        # Define subplot index
+        subplot_index = j
+
+        # Plot the combined predicted curve for γ_matrix and γ_star
+        plot!(p[subplot_index], real_time, combined_curve_matrix, label="γ_matrix", color=:blue)
+        plot!(p[subplot_index], real_time, combined_curve_star, label="γ_predicted", color=:red, linestyle=:dash)
+
+        # Add the upper and lower bounds if they exist
+        if !isnothing(upper_bound)
+            plot!(p[subplot_index], real_time, curr_basis * upper_bound[j, :], label="Upper Bound", color=:green, linestyle=:dashdotdot)
         end
-        
-        # Save the plot to a file
-        savefig(p, joinpath(folder_path, "predictor$(j).png"))
+        if !isnothing(lower_bound)
+            plot!(p[subplot_index], real_time, curr_basis * lower_bound[j, :], label="Lower Bound", color=:brown, linestyle=:dashdotdot)
+        end
     end
+
+    if show_plot
+        display(p)
+    end
+    
+    # Save the plot to a file
+    savefig(p, joinpath(folder_path, "combined.png"))
 end
 
 

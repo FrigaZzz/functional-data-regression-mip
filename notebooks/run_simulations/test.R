@@ -1,9 +1,9 @@
 library(here)
 
-simulation_name = "2_predictors_coef"
+simulation_name = "paper"
 simulation_settings_file = "default"
 # Source the generic simulator script
-source(here("src", "R", "generic_simulator", "simulate_paper.R"))
+source(here("src", "R", "generic_simulator", "simulate_main.R"))
 source(here("src", "R", "generic_simulator", "utils","loader_utilities.R"))
 
 set.seed(1)

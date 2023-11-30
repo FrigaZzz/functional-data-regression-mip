@@ -31,7 +31,7 @@ function mip_functional_regression(Y, Z, lambda, lambda_group, BIG_M; intercept=
 
     
     # Set up the objective function
-    @objective(model, Min, sum((Y[i]  - sum(Z[i, :, : ] * beta[:,:]) )^2 for i in 1:n))
+    @objective(model, Min, sum((Y[i]  - sum(Z[i, :, : ]' * beta[:,:]) )^2 for i in 1:n))
 
 
 

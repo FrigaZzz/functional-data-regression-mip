@@ -6,8 +6,9 @@ beta_funcs <- list(
   function(t) rep(0, length(t))
 )
 true_predictors <- c(1,0)
-simulation_type = "paper"
 
+simulation_type = "paper"
+coef_specs <- coef_specs_original 
 predictors <- 2
 measurements <- 100
 observations <- 200
@@ -23,7 +24,7 @@ mu_funcs <- list(
         
     },
     function(t,args) {
-        args$b1 * sin(pi * t) + args$b2
+        t*2
     }
 )
 

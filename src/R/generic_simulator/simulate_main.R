@@ -14,6 +14,13 @@ generate_data <- function(
     simulation_type = "not paper") {
 
   # set.seed(seed)
+  # debug print all input parameters
+  print(paste("predictors:", predictors))
+  print(paste("observations:", observations))
+  print(paste("measurements:", measurements))
+  print(paste("basis_functions:", basis_functions))
+  print(paste("intercept:", intercept))
+  
 
   # Call the appropriate data generation function based on simulation type
   if (simulation_type == "paper") {
@@ -39,3 +46,4 @@ generate_data <- function(
 
   list(W = W, Z = Z_matrix, Y = Y, J = J, B = Beta_matrix, U = U, X = X, basis_objs = basis_objs, basis_values = basis_values, beta_point_values = beta_point_values)
 }
+

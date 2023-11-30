@@ -1,4 +1,6 @@
 # parameters_3_predictors.R
+simulation_type = "non paper"
+
 # Parameter definitions for a simulation with 3 predictors.
 
 beta_funcs <- list(

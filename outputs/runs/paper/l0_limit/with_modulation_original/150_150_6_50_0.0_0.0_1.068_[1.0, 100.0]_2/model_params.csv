@@ -1,0 +1,2 @@
+SimulationName,Directory,SettingName,ModelName,Observations,Predictors,BasisFunctions,Measurements,Lambda,LambdaGroup,M,SNR,Seed
+paper,"150_150_6_50_0.0_0.0_1.068_[1.0, 100.0]_2",with_modulation_original,l0_limit,150,6.0,6,50,0.0,0.0,1.068,"[1.0, 100.0]",2

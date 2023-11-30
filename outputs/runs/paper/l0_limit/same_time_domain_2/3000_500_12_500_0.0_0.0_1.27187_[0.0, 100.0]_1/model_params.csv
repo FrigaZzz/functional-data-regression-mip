@@ -1,0 +1,2 @@
+SimulationName,Directory,SettingName,ModelName,Observations,Predictors,BasisFunctions,Measurements,Lambda,LambdaGroup,M,SNR,Seed
+paper,"3000_500_12_500_0.0_0.0_1.27187_[0.0, 100.0]_1",same_time_domain_2,l0_limit,3000,6.0,12,500,0.0,0.0,1.27187,"[0.0, 100.0]",1

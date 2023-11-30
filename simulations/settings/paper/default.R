@@ -13,7 +13,7 @@ noise_snr = c(100,100)
 seed <- 1
 
 simulation_type = "paper"
-
+coef_specs <- coef_specs_original 
 beta_funcs <- list(
   function(t) {
     sin(t)
@@ -75,12 +75,12 @@ mu_funcs <- list(
 # )
 
 time_domains <- list(
-  list(0, 1),
-  list(0, pi / 3),
-  list(-1, 1),
-  list(0, pi / 3),
-  list(-2, 1),
-  list(-1, 1)
+  list(0, 2),
+  list(0, 2 *pi / 3),
+  list(-1, 2 *1),
+  list(0,2 * pi / 3),
+  list(-2,2 * 1),
+  list(-1,2 * 1)
 )
 # cov_funcs is null only in the paper simulation
 cov_funcs <- NULL

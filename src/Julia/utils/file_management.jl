@@ -27,7 +27,7 @@ function parse_command_line_arguments(args)
     λ = parse(Float64, args[11])  # Assuming λ is a floating point number
     λ_group = parse(Float64, args[12])  # Assuming λ_group is a floating point number
     M = parse(Float64, args[13])  # Changed from Int to Float64
-    return model_name, simulation_name, setting_name, measurements, observations, observations_test, basis_functions, noise_snr, seed, λ, λ_group, M
+    return model_name, simulation_name, setting_name, observations, observations_test,measurements, basis_functions, noise_snr, seed, λ, λ_group, M
 end
 """
 

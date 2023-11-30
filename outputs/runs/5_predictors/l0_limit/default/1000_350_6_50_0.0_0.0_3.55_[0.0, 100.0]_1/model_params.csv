@@ -1,0 +1,2 @@
+SimulationName,Directory,SettingName,ModelName,Observations,Predictors,BasisFunctions,Measurements,Lambda,LambdaGroup,M,SNR,Seed
+5_predictors,"1000_350_6_50_0.0_0.0_3.55_[0.0, 100.0]_1",default,l0_limit,1000,5.0,6,50,0.0,0.0,3.55,"[0.0, 100.0]",1

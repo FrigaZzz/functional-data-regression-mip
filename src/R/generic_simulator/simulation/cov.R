@@ -13,13 +13,12 @@ simulate_cov_data <- function(mu_funcs, cov_funcs, beta_funcs, observations, tim
   X <- U
   # Add noise to Y (if specified)
   
-  X <- X + add_snr_noise( X, noise_snr[1])
+  # X <- X + add_snr_noise( X, noise_snr[1])
 
   # Compute Y values
-  Y <- compute_Y_values_generic(X, Betas, observations, predictors, time_domains, intercept)$Y
+  Y <- compute_Y_values_with_func(U, Betas, observations, predictors, time_domains, intercept)$Y
 
   # Add noise to Y (if specified)
-
   Y <- Y + add_snr_noise(Y, noise_snr[2])
 
 

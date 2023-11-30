@@ -1,6 +1,7 @@
 # parameters_10_predictors.R
 # This file defines parameters for a simulation with 10 predictors.
 true_predictors <- c(1,1,0,0,0,0,0,0,0,1)
+simulation_type = "non paper"
 
 # Define the number of measurements and observations
 predictors <- 10

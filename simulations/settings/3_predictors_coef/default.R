@@ -1,4 +1,5 @@
 # Parameter definitions for a custom simulation
+
 # vector of affected betas by c value
 c_val <- 0
 true_predictors <- c(1, 1, 0)
