@@ -93,11 +93,11 @@ function compute_metrics(Y_test, Z_coeff, beta_matrix, beta_star, alpha_star, gr
         "ISE_Coefficients" => ise_beta,
         "MSE_Predictions" => mse_Y,
         "RMSE_Predictions" => rmse_Y,
-        "MAE_Predictions" => mae_Y,
+        # "MAE_Predictions" => mae_Y,
         "R_squared" => r2,
         "Adjusted_R_squared" => adj_r2,
-        "Functional_Correlation" => func_correlation,
-        "CDF_Distance" => cdf_dist,
-        "Area_Between_Curves" => area_between
+        # "Functional_Correlation" => func_correlation,
+        # "CDF_Distance" => cdf_dist,
+        # "Area_Between_Curves" => area_between
     )
 end

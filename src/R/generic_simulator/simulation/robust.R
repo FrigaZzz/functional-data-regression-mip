@@ -1,7 +1,7 @@
 library(robflreg)
 
 
-simulate_data_robust <- function(n_pred, n_curve, n_gp) {
+simulate_data_robust_from_library <- function(n_pred, n_curve, n_gp) {
   # Generate a dataset with n_pred functional predictors and n_curve observations
   sim.data <- generate.sf.data(n = n_curve, n.pred = n_pred, n.gp = n_gp)
 
@@ -19,25 +19,6 @@ simulate_data_robust <- function(n_pred, n_curve, n_gp) {
   # Return a list containing the generated data
   return(list(X = X, U = X, Y = Y, beta_values = beta_values))
 }
-reshape_X <- function(X) {
-  # Get the number of predictors, observations, and measurements
-  n_pred <- length(X)
-  n_curve <- dim(X[[1]])[1]
-  n_gp <- dim(X[[1]])[2]
-
-  # Initialize a 3D array to store the reshaped X
-  X_reshaped <- array(0, dim = c(n_curve, n_pred, n_gp))
-
-  # For each predictor
-  for (j in 1:n_pred) {
-    # Assign the matrix corresponding to the predictor to the appropriate slice of the 3D array
-    X_reshaped[, j, ] <- X[[j]]
-  }
-
-  # Return the reshaped X
-  return(X_reshaped)
-}
-
 
 
 # set.seed(1)
@@ -68,6 +49,7 @@ simulate_data_robust <- function(n_pred, n_curve, n_gp) {
   # Return a list containing the generated data
   return(list(X = X, U = X, Y = Y, beta_values = beta_values))
 }
+
 reshape_X <- function(X) {
   # Get the number of predictors, observations, and measurements
   n_pred <- length(X)
@@ -86,7 +68,6 @@ reshape_X <- function(X) {
   # Return the reshaped X
   return(X_reshaped)
 }
-
 
 
 # set.seed(1)

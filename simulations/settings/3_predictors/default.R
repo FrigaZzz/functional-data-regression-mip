@@ -1,5 +1,5 @@
 # parameters_3_predictors.R
-simulation_type = "non paper"
+simulation_type = "cov"
 
 # Parameter definitions for a simulation with 3 predictors.
 

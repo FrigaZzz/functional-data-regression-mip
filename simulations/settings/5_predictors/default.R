@@ -1,6 +1,6 @@
 # parameters_5_predictors.R
 # Parameter definitions for a simulation with 5 predictors.
-simulation_type = "non paper"
+simulation_type = "cov"
 
 # Define the number of measurements, observations, basis functions, error standard deviation, and seed
 predictors <- 5

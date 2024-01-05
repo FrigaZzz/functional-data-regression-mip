@@ -228,7 +228,7 @@ function load_simulation_gertheiss(simulation_name, simulation_settings_file, pr
     if phi != nothing
         overrides["phi"] = phi
     end
-
+    
     @rput simulation_name
     @rput simulation_settings_file
     @rput runner_file_path
@@ -242,9 +242,8 @@ function load_simulation_gertheiss(simulation_name, simulation_settings_file, pr
         time_domains_eval <- lapply(inputs$time_domains, function(domain) {
             seq(from = domain[[1]], to = domain[[2]], length.out = inputs$measurements)
         })
-        print("phi")
-        print(inputs$phi)
         inputs$time_domains <- time_domains_eval
+        print(inputs)
         outputs <- run_simulation(inputs)
     """
     full_output = rcopy(R"(outputs)")

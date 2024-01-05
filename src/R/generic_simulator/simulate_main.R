@@ -27,9 +27,6 @@ generate_data <- function(
     data <- simulate_paper_data(mu_funcs, beta_funcs, observations, time_domains, intercept, predictors, noise_snr)
    } else if (simulation_type == "paper2") {
     data <- simulate_paper2_data( observations, time_domains,  predictors) 
-  } else if (simulation_type == "robust") {
-  data = simulate_data_robust(predictors, observations, measurements) 
-
   }else {
     data <- simulate_cov_data(mu_funcs, cov_funcs, beta_funcs, observations, time_domains, intercept, predictors, noise_snr) 
   }

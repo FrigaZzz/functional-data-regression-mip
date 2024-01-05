@@ -87,7 +87,7 @@ adapt1 = NULL, adapt2 = NULL, ...){
 			tmp = delt[jj]*(X[[jj]]%*%B[[jj]])
 			Z = cbind(Z, tmp%*%iR[[jj]])
 		}
-    return (Z)
+return (list(Z = Z, K = K, iR = iR, eK = eK, B = B))
 }
 
 
@@ -139,9 +139,15 @@ generate_data <- function(
   J <- compute_J_matrix_generic(basis_objs, predictors, basis_functions)
   W <- compute_W_matrix_generic(X, basis_functions, time_domains, basis_objs)
   print(phi )
-  Z_matrix = compute_Z_penalized(Y = Y, X = fobs, Tps = tps, phi = phi, dfs = basis_functions )
-  
-  list(W = W, Z = Z_matrix, Y = Y, J = J, B = Beta_matrix, U = U, X = X, basis_objs = basis_objs, basis_values = basis_values, beta_point_values = beta_point_values)
+  z_computation_result = compute_Z_penalized(Y = Y, X = fobs, Tps = tps, phi = phi, dfs = basis_functions )
+
+  Z_matrix = z_computation_result$Z
+  K_matrix = z_computation_result$K
+  iR_matrix = z_computation_result$iR
+  eK_matrix = z_computation_result$eK
+  Bs = z_computation_result$B
+
+  list(W = W, Z = Z_matrix, Y = Y, J = J, B = Beta_matrix, U = U, X = X, basis_objs = basis_objs, basis_values = basis_values, beta_point_values = beta_point_values, K = K_matrix, iR = iR_matrix, eK = eK_matrix, Bs = Bs)
 
 }
 
