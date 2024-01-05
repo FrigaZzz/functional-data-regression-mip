@@ -10,7 +10,28 @@ The objective function consists of the sum of squared errors for the regression 
 \]
 
 Subject to the following constraints:
+\[
+-\text{BIG\_M} \cdot \gamma_{\text{nonzero},jk} \leq \gamma_{jk} \leq \text{BIG\_M} \cdot \gamma_{\text{nonzero},jk} \quad \forall j=1,...,p; \ k=1,...,r
+\]
+\[
+\sum_{j=1}^{p} \text{group}_j \leq \text{group\_limit}
+\]
 
+\[
+\sum_{k=1}^{r} \gamma_{\text{nonzero},jk} \leq r \cdot \text{group}_j \quad \forall j=1,...,p
+\]
+
+\[
+\gamma_{\text{nonzero},jk} \leq \text{group}_j \quad \forall j=1,...,p; \ k=1,...,r
+\]
+
+\[
+\gamma_{jk} \in \mathbb{R}, \ \ \gamma_{\text{nonzero},jk} \in \{0,1\} \quad \forall j=1,...,p; \ k=1,...,r
+\]
+
+\[
+\text{group}_j \in \{0,1\} \quad \forall j=1,...,p
+\]
 **Coefficient-Binary Link Constraints:**
 \[
 -\text{BIG\_M} \cdot \gamma_{\text{nonzero},jk} \leq \gamma_{jk} \leq \text{BIG\_M} \cdot \gamma_{\text{nonzero},jk} \quad \forall j=1,...,p; \ k=1,...,r
@@ -25,13 +46,15 @@ The use of a large value $\text{BIG\_M}$ effectively relaxes the constraint when
 \]
 This constraint enforces that the total number of groups with non-zero coefficients does not exceed a predefined limit $\text{group\_limit}$, thus controlling the group-level sparsity.
 
+
+
 **Group-Nonzero Coefficient Link Constraints:**
 \[
 \sum_{k=1}^{r} \gamma_{\text{nonzero},jk} \leq r \cdot \text{group}_j \quad \forall j=1,...,p
 \]
 These constraints ensure that if any coefficient in a group is non-zero, the group binary variable $\text{group}_j$ will be set to 1. They link the individual coefficient non-zero indicators to the group indicator.
 
-**Binary Coefficient Constraint within Group:**
+**Binary Coefficient Constraint within Group:** (can replace the one above)
 \[
 \gamma_{\text{nonzero},jk} \leq \text{group}_j \quad \forall j=1,...,p; \ k=1,...,r
 \]

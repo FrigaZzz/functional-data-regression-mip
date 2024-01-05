@@ -1,7 +1,7 @@
 using JuMP
 using Gurobi
 
-function mip_functional_regression(Y, Z, lambda, lambda_group, BIG_M, group_limit=Inf)
+function mip_functional_regression(Y, Z, lambda, lambda_group, BIG_M; intercept = false , group_limit=Inf)
     n, p, r = size(Z)
     group_limit = min(group_limit, p)
     # MIP parameters

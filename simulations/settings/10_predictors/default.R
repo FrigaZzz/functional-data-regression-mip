@@ -1,5 +1,7 @@
 # parameters_10_predictors.R
 # This file defines parameters for a simulation with 10 predictors.
+true_predictors <- c(1,1,0,0,0,0,0,0,0,1)
+simulation_type = "cov"
 
 # Define the number of measurements and observations
 predictors <- 10
@@ -7,9 +9,8 @@ measurements <- 500
 observations <- 500
 basis_functions = 5
 intercept = 0
+noise_snr = c(100,100)
 norder = 4
-error_sd = 0.05
-noise_sd = 0.00
 seed = 1
 mu_funcs = list(
     function(t) sin(2 * pi * t),
@@ -46,17 +47,19 @@ mu_funcs = list(
     function(t) 0 * t, # This assumes that the function returns a single scalar zero
     function(t) 0 * t, # This assumes that the function returns a single scalar zero
     function(t) 0 * t, # This assumes that the function returns a single scalar zero
-    function(t) 0 * t  # This assumes that the function returns a single scalar zero
+    function(t) 4^t + t  
   )
+
   time_domains = list(
-    seq(0, 1, length.out = measurements),
-    seq(0, pi / 3, length.out = measurements), 
-    seq(-1, 1, length.out = measurements), 
-    seq(0, pi / 3, length.out = measurements), 
-    seq(-2, 1, length.out = measurements), 
-    seq(-1, 1, length.out = measurements),
-    seq(-1, 1, length.out = measurements), 
-    seq(0, pi / 3, length.out = measurements), 
-    seq(-2, 1, length.out = measurements), 
-    seq(-1, 1, length.out = measurements) 
-  )
+  list(0, 1),
+  list(0, pi / 3),
+  list(-1, 1),
+  list(0, pi / 3),
+  list(-2, 1),
+  list(0, 1),
+  list(0, pi / 3),
+  list(-1, 1),
+  list(0, pi / 3),
+  list(-2, 1)
+)
+

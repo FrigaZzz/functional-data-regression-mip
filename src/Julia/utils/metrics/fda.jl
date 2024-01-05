@@ -89,7 +89,7 @@ Measures the distance between the CDFs of the predicted and actual functions.
 """
 function cdf_distance(Y_test, Y_pred)
     # Assuming Y_test and Y_pred are sorted
-    sum(abs.(cumsum(Y_test) / sum(Y_test) - cumsum(Y_pred) / sum(Y_pred)))
+    sum(abs.(cumsum(Y_test, dims=1) / sum(Y_test, dims=1) - cumsum(Y_pred, dims=1) / sum(Y_pred, dims=1)))
 end
 
 

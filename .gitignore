@@ -12,7 +12,7 @@
 .renv
 
 # Output files from the directory output
-outputs/*
+
 
 #libs
 renv/*

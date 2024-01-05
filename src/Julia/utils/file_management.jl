@@ -12,33 +12,23 @@ Parse command line arguments to extract simulation parameters.
 # Returns
 - Tuple containing all parsed parameters: `model_name`, `simulation_name`, `measurements`, `observations`, `observations_test`, `basis_functions`, `error_sd`, `seed`, `λ`, `λ_group`, `M`, `override_true_predictors`.
 
-# Examples
-```julia
-julia> parse_command_line_args(["ModelX", "SimY", "100", "200", "50", "5", "0.1", "12345", "0.01", "0.02", "10"])
-("ModelX", "SimY", 100, 200, 50, 5, 0.1, 12345, 0.01, 0.02, 10, nothing)
-```
 """
-function parse_command_line_args(args)
+function parse_command_line_arguments(args)
     model_name = args[1]
     simulation_name = args[2]
-    measurements = parse(Int, args[3])
-    observations = parse(Int, args[4])
-    observations_test = parse(Int, args[5])
-    basis_functions = parse(Int, args[6])
-    error_sd = parse(Float64, args[7])
-    seed = parse(Int, args[8])
-    λ = parse(Float64, args[9])  # Assuming λ is a floating point number
-    λ_group = parse(Float64, args[10])  # Assuming λ_group is a floating point number
-    M = parse(Int, args[11])
-    if length(args) > 11
-        override_true_predictors = parse(Int, args[12])
-    else
-        override_true_predictors = nothing
-    end
-    return model_name, simulation_name, measurements, observations, observations_test, basis_functions, error_sd, seed, λ, λ_group, M, override_true_predictors
+    setting_name = args[3]  # Retrieve setting_name from the third argument
+    measurements = parse(Int, args[4])
+    observations = parse(Int, args[5])
+    observations_test = parse(Int, args[6])
+    basis_functions = parse(Int, args[7])
+    # parse array that contains a boolean and a float
+    noise_snr = [lowercase(args[8]) == "true", parse(Float64, args[9])]    
+    seed = parse(Int, args[10])
+    λ = parse(Float64, args[11])  # Assuming λ is a floating point number
+    λ_group = parse(Float64, args[12])  # Assuming λ_group is a floating point number
+    M = parse(Float64, args[13])  # Changed from Int to Float64
+    return model_name, simulation_name, setting_name, observations, observations_test,measurements, basis_functions, noise_snr, seed, λ, λ_group, M
 end
-
-
 """
 
 Ensure that a directory exists at the specified path. If the directory does not exist, it is created.
@@ -84,9 +74,9 @@ julia> define_output_dir("SimY", 200, 50, 5, 100, 0.01, 0.02, 10, 0.1, 12345, "p
 "path/to/project/outputs/runs/SimY/200_50_5_100_0.01_0.02_10_0.1_12345"
 ```
 """
-function define_output_dir(model_name, simulation_name, observations, observations_test, basis_functions, measurements, lambda, lambda_group, M, error_sd, seed, project_root)
+function define_output_dir(model_name, simulation_name, setting_name, observations, observations_test, basis_functions, measurements, lambda, lambda_group, M, error_sd, seed, project_root)
     # Define directory structure
-    folder_name = "$(simulation_name)/$(model_name)/$(observations)_$(observations_test)_$(basis_functions)_$(measurements)_$(lambda)_$(lambda_group)_$(M)_$(error_sd)_$(seed)"
+    folder_name = "$(simulation_name)/$(model_name)/$(setting_name)/$(observations)_$(observations_test)_$(basis_functions)_$(measurements)_$(lambda)_$(lambda_group)_$(M)_$(error_sd)_$(seed)"
     output_dir = joinpath(project_root, "outputs", "runs", folder_name)
     return output_dir
 end

@@ -8,7 +8,29 @@ Minimize the objective function:
 \[ \min_{\gamma, \text{group}}  \sum_{i=1}^{n}\left(Y_i - \sum_{j=1}^{p}\sum_{k=1}^{r} Z_{ijk} \gamma_{jk}\right)^2 + \lambda \sum_{j=1}^{p} \sum_{k=1}^{r} t_{jk} + \lambda_{\text{group}} \sum_{j=1}^{p} \text{group}_j \]
 
 Subject to:
+   \[
+   \gamma_{jk} \leq t_{jk}, \quad -\gamma_{jk} \leq t_{jk}, \quad \forall j \in \{1, \ldots, p\}, \forall k \in \{1, \ldots, r\}
+   \]
 
+
+   \[
+   \gamma_{jk} \leq \text{BIG\_M} \times \gamma_{\text{nonzero}_{jk}}, \quad -\gamma_{jk} \geq -\text{BIG\_M} \times \gamma_{\text{nonzero}_{jk}}, \quad \forall j \in \{1, \ldots, p\}, \forall k \in \{1, \ldots, r\}
+   \]
+   \[
+   \gamma_{\text{nonzero}_{jk}} \leq \text{group}_j, \quad \forall j \in \{1, \ldots, p\}, \forall k \in \{1, \ldots, r\}
+   \]
+
+   \[
+   \sum_{k=1}^{r} \gamma_{\text{nonzero}_{jk}} \geq \text{group}_j, \quad \forall j \in \{1, \ldots, p\}
+   \]
+
+   \[
+   \sum_{j=1}^{p} \text{group}_j \leq \text{group\_limit}
+   \]
+
+   \[
+   \text{group}_j \in \{0,1\}, \quad t_{jk} \geq 0, \quad \gamma_{\text{nonzero}_{jk}} \in \{0,1\}, \quad \forall j \in \{1, \ldots, p\}, \forall k \in \{1, \ldots, r\}
+   \]
 1. **Coefficient Magnitude Constraints:**
    \[
    \gamma_{jk} \leq t_{jk}, \quad -\gamma_{jk} \leq t_{jk}, \quad \forall j \in \{1, \ldots, p\}, \forall k \in \{1, \ldots, r\}

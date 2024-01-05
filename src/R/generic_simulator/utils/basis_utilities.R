@@ -53,8 +53,7 @@ expand_functional_data <- function(data_matrix, time, basis_obj) {
 #' @param basis_obj A B-spline basis object
 #' 
 #' @return A vector of smoothed beta coefficients
-smooth_beta_function <- function(beta_func,time,basis_obj) {
-  beta_values <- beta_func(time)
+smooth_beta_function <- function(beta_values,time,basis_obj) {
   fdPar_obj <- fdPar(basis_obj)
   smoothed_beta <- smooth.basis(time, beta_values, fdPar_obj)
   beta_coefs <- coef(smoothed_beta$fd)
@@ -62,86 +61,59 @@ smooth_beta_function <- function(beta_func,time,basis_obj) {
   return(beta_coefs)
 }
 
-#' Smooth beta coefficients into the B-spline basis for multiple predictors
-#' 
-#' @param beta_funcs A list of functions that return beta values at given time points
-#' @param num_basis The number of basis functions
-#' @param time A vector of time points
-#' @param basis_obj A B-spline basis object
-#' 
-#' @return A list containing the smoothed beta coefficients, the beta point values, and the basis values
-smooth_betas <- function(beta_funcs,num_basis, time, basis_obj) {
-  num_predictors <- length(beta_funcs)
-  
-  # Initialize a matrix to store the smoothed beta coefficients
-  beta_matrix <-  array(0, dim = c(num_predictors,num_basis))
-  beta_point_values <-  array(0, dim = c(num_predictors,length(time)))
-  basis_values <-   eval.basis(time, basis_obj)
-  for (i in 1:num_predictors) {
-    beta_func <- beta_funcs[[i]]    
-    beta_values <- beta_func(time)
-    beta_point_values[i,] <- beta_values
-    fdPar_obj <- fda::fdPar(basis_obj)
-    smoothed_beta <- fda::smooth.basis(time, beta_values, fdPar_obj)
-    beta_matrix[i,] <- smoothed_beta$fd$coefs
-  }
-  return(list(beta_matrix = beta_matrix, beta_point_values =   beta_point_values, basis_values = basis_values))
-}
+
 
 #' Smooth beta coefficients into the B-spline basis for multiple predictors with different time domains
 #' 
-#' @param beta_funcs A list of functions that return beta values at given time points
+#' @param beta_values A list of functions that return beta values at given time points
 #' @param num_basis The number of basis functions
 #' @param time_domains A list of vectors of time points for each predictor
 #' @param basis_objs A list of B-spline basis objects for each predictor
 #' 
 #' @return A list containing the smoothed beta coefficients, the beta point values, and the basis values
-smooth_betas_generic <- function(beta_funcs,num_basis, time_domains, basis_objs) {
-  num_predictors <- length(beta_funcs)
+smooth_betas_generic <- function(beta_values,num_basis, time_domains, basis_objs) {
+  
+  num_predictors <- length(time_domains)
   measurements <- length(time_domains[[1]])
   # Initialize a matrix to store the smoothed beta coefficients
   beta_matrix <-  array(0, dim = c(num_predictors,num_basis))
-  beta_point_values <-  array(0, dim = c(num_predictors, measurements))
   basis_values <-  array(0, dim = c(num_predictors,measurements,num_basis))
   for (i in 1:num_predictors) {
-    beta_func <- beta_funcs[[i]]
+    beta_value <- beta_values[i,]
     basis_obj <- basis_objs[[i]]
     time <- time_domains[[i]]
-
-    beta_values <- beta_func(time)
-    beta_point_values[i,] <- beta_values
     basis_values[i,,] <- eval.basis(time, basis_obj)
     fdPar_obj <- fda::fdPar(basis_obj)
-    smoothed_beta <- fda::smooth.basis(time, beta_values, fdPar_obj)
+    smoothed_beta <- fda::smooth.basis(time, beta_value, fdPar_obj)
     beta_matrix[i,] <- smoothed_beta$fd$coefs
   }
-  return(list(beta_matrix = beta_matrix, beta_point_values = beta_point_values, basis_values = basis_values))
+  return(list(beta_matrix = beta_matrix,  basis_values = basis_values))
 
 }
 
 
-test = FALSE
-if (test) {
-  # Generate some example data
-  n_obs <- 100
-  n_measurements <- 100
-  n_funcs <- 5
-  time <- seq(0, 1, length.out = n_measurements)
+# test = FALSE
+# if (test) {
+#   # Generate some example data
+#   n_obs <- 100
+#   n_measurements <- 100
+#   n_funcs <- 5
+#   time <- seq(0, 1, length.out = n_measurements)
 
-  # Create data matrix with dimensions consistent with time vector
-  data_matrix <- matrix(rnorm(n_obs * n_measurements), nrow = n_obs, ncol = n_measurements)
+#   # Create data matrix with dimensions consistent with time vector
+#   data_matrix <- matrix(rnorm(n_obs * n_measurements), nrow = n_obs, ncol = n_measurements)
 
-  # Define B-spline basis
-  n_basis <- 10
-  bspline_basis <- create.bspline.basis(rangeval = c(0, 1), nbasis = n_basis, norder = 4)
+#   # Define B-spline basis
+#   n_basis <- 10
+#   bspline_basis <- create.bspline.basis(rangeval = c(0, 1), nbasis = n_basis, norder = 4)
 
-  # Expand data into B-spline basis
-  expanded_data <- expand_functional_data(data_matrix, time, bspline_basis)
+#   # Expand data into B-spline basis
+#   expanded_data <- expand_functional_data(data_matrix, time, bspline_basis)
 
-  # Define beta function
-  beta_func <- function(t) sin(2 * pi * t)
+#   # Define beta function
+#   beta_func <- function(t) sin(2 * pi * t)
 
-  # Smooth beta function into B-spline basis
-  beta_coefs <- smooth_beta_function(beta_func, time, bspline_basis)
+#   # Smooth beta function into B-spline basis
+#   beta_coefs <- smooth_beta_function(beta_func, time, bspline_basis)
 
-}
+# }

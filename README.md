@@ -47,7 +47,7 @@ Each script will automate the setup of the project environment by installing the
 
 You can also proceed with the manual configuration.
 
-## Julia - Manual Project Environment Setup 
+### Julia - Manual Project Environment Setup 
 
 
 To set up the project environment and install the necessary dependencies, follow these steps:
@@ -76,7 +76,7 @@ After completing these steps, you will have all the necessary packages installed
 ---
 
 
-## R - Manual Project Environment Setup 
+### R - Manual Project Environment Setup 
 
 You can either decide to install the required dependencies that are defined in the DESCRIPTION file or reproduce the whole environment, by 
 installing the RENV ENVIRONMENT.
@@ -113,26 +113,104 @@ installing the RENV ENVIRONMENT.
 
 
 
----
 
-### Functional Data Simulation Process
+## Functional Data Simulation Pipeline
 
-The simulation process generates synthetic functional data by modeling both the mean function and the covariance structure for each predictor. The data is generated to have specific statistical properties that mimic real-world scenarios in functional data analysis (FDA). This simulation approach is useful for testing FDA methods and algorithms in a controlled setting where the true underlying processes are known.
+The main execution pipeline involves several steps, from generating functional predictors (both true and observed) to computing response variables (Y) and incorporating errors and corrective terms.
+Additional steps include creating B-spline basis objects, smoothing beta coefficients, and computing matrices essential for functional data analysis (e.g., \( J \), \( W \), \( Z \) matrices).
+
+## Generation of True and Observed Data
+
+### True Data Generation (`simulate_true_predictors_Ut`)
+
+- **Purpose**: Generates true functional predictors (\( U \)) based on provided mean functions (\( mu\_funcs \)), number of observations, and time domains.
+- **Mean Functions (\( mu\_funcs \))**: These are defined to allow for variation across observations. Each mean function can incorporate `random coefficients` drawn from distributions like normal or uniform or through `a matern process`. This leads to each observation having a unique realization of the mean function. 
+
+### Observed Data Generation (`simulate_observations_Xt`)
+
+- **Purpose**: Applies amplitude normalization to the true data \( U \) and adds random error terms to generate observed functional predictors (\( X \)).
+- **Process**:
+  - For each observation and predictor, a range-based standard deviation of the error term is calculated.
+  - Random error terms are generated and added to \( U \) to form \( X \), introducing variability and mimicking observational noise.
+
+## Response Variable (Y) Generation and Error Addition
+
+### Computing Y Values (`compute_Y_values`)
+
+- **Purpose**: Computes the response variable \( Y \) based on the observed functional predictors \( X \), beta coefficients, and other parameters like the intercept.
+- **Method**:
+  - Functional data objects are created for both \( X \) and the beta coefficients.
+  - These objects are multiplied and integrated over the time domain to compute \( Y \).
+
+### Amplitude Normalization and Error Addition
+
+- **Amplitude Normalization (`compute_amplitude_norm`)**: This function computes a normalization factor based on the range of \( Y \) and adds normally distributed random errors, introducing an amplitude-related variability to \( Y \).
+- **Signal-to-Noise Ratio (SNR) Adjustment (`add_snr_noise`)**: Optionally, noise can be added to \( Y \) to achieve a desired SNR level, providing control over the signal quality.
+
+
+## Functional Data Simulation Strategies
+
+We will now outlinetwo the distinct strategies for simulating functional data. Each strategy employs a different approach to the generation of mean functions, impacting how the functional data varies across observations.
+
+### Strategy 1: Consistent Mean Across Observations
+
+This strategy involves simulating functional data where all observations share the same mean function for each feature. The variability among observations is introduced through a `covariance function`, leading to different realizations around a shared mean for a `specific predictor`.
+
+This strategy is appropriate when the underlying mean behavior of the feature is consistent across all observations, but individual variations are expected due to random effects.
 
 #### Inputs:
 
-1. `mu_funcs`: A list of mean functions, each representing the expected value of the data at any given time point `t`. For example, the function `sin(2 * pi * t)` implies that the mean value of the data follows a sinusoidal pattern over time.
 
+1. `mu_funcs`
+   -  A list of mean functions, each representing the expected value of the data at any given time point `t`. 
+    - They are deterministic and consistent across all observations, defining a common mean trend or pattern for each feature.
+    - They are defined over a `specific time domain`
+```r
+  mu_funcs <- list(
+    function(t) sin(2 * pi * t),
+    function(t) 4 * t * (1 + cos(2 * pi * t)),
+    function(t) 4 * t^2
+  )
+```
+2. `time_domains`: The range of time domains over which each function is evaluated.
+```r
+  time_domains = list(
+  list(0, 1),
+  list(0, pi / 3),
+  list(-1, 1)
+  )
+```
+3. `cov_funcs`: 
+   - A list of covariance functions generated by `generate_covariance_function`. 
+   - Each function specifies the covariance between any two time points `t` and `s`, which describes how the observations are correlated over time.
+   - Covariance functions determine how values of the function at different points in time are related to each other, with parameters controlling the overall variance (`sig2`) and the rate at which correlation between points decreases as the distance between them increases (`rho`).
+```r
+     cov_funcs <- list(
+    list(sig2 = 0.5, rho = 1, decay_type = "matern"),
+    list(sig2 = 0.5, rho = 1, decay_type =  "matern"),
+    list(sig2 = 0.5, rho = 1, decay_type =  "matern")
+  )
+```
 
-2. `cov_funcs`: A list of covariance functions generated by `generate_covariance_function`. Each function specifies the covariance between any two time points `t` and `s`, which describes how the observations are correlated over time.Covariance functions determine how values of the function at different points in time are related to each other, with parameters controlling the overall variance (`sig2`) and the rate at which correlation between points decreases as the distance between them increases (`rho`).
-3. `beta_funcs`: A list of functions representing the effect sizes over time. They are used to model the temporal dynamics of the predictors, specifying how the impact of covariates on the `Response` changes over the domain. For instance:
+4. `beta_funcs`: A list of functions representing the effect sizes over time. They are used to model the temporal dynamics of the predictors, specifying how the impact of covariates on the `Response` changes over the domain. For instance:
+```r
+beta_funcs <- list(
+  function(t) {
+    4 * exp(-abs(t - 1))
+  },
+  function(t) {
+    sin(2 * t)
+  },
+  function(t) {
+    rep(0, length(t))
+  }
+)
+```
 - A `beta_func` defined as function(t) **4 * exp(-abs(t - 1))** suggests that the effect of the predictor on the response has a peak at t = 1 and decays exponentially away from this point. They are applied to the functional predictors to simulate the dependent variable.
 
-- A `beta_func` that returns **0 * t**, would imply that the corresponding functional predictor has no effect on the response variable.
+- A `beta_func` that returns **rep(0, length(t))**, would imply that the corresponding functional predictor has no effect on the response variable.
 
 The influence of these beta_funcs is critical when simulating the scalar response in a dataset because it defines the nature of the relationship between the predictors and the response.
-
-4. `time`: The range of time values over which the functions are evaluated.
 
 #### Covariance Function Generation (`generate_covariance_function`):
 
@@ -147,9 +225,10 @@ This function creates a covariance function based on specified parameters:
 
 #### Data Generation Process:
 
-The `simulate_functional_features` function orchestrates the simulation process, using the mean and covariance functions to generate data for each functional predictor across a specified number of observations and time points. It uses `Map` to apply the `simulate_data` function to each set of mean and covariance functions, which generates a multi-dimensional array representing multiple functions over the time domain.
+The `simulate_functional_features` function orchestrates the simulation process, using the mean and covariance functions to generate data for each functional predictor across a specified number of observations and time points. It generates data for each feature by drawing from a multivariate normal distribution with the mean provided by mu_funcs and the covariance matrix provided by the covariance function (`e.g. Matern Process`).
 
-The `simulate_data` generates for each mean and covariance function, a multivariate normal dataset with mean vector `mu` (evaluated mean function at each time point) and covariance matrix `Sigma` (evaluated covariance function at each pair of time points). The result is a matrix where each row corresponds to an observation of the functional data, and each column corresponds to a time point. 
+The `simulate_data` generates for each mean and covariance function, a multivariate normal dataset with mean vector `mu` (evaluated mean function at each time point) and covariance matrix `Sigma` (evaluated covariance function at each pair of time points). 
+This results in each feature having its own characteristic mean behavior (as defined by mu_funcs) and variability and correlation structure (as defined by the Matérn covariance function).
 
 1. **Mean Function (`mu_func`)**: Determines the central tendency of the data over time. For instance, a sinusoidal mean function will result in data that oscillates in a wave-like pattern.
 
@@ -158,39 +237,35 @@ The `simulate_data` generates for each mean and covariance function, a multivari
 
 Using `MASS::mvrnorm` to simulate the data can address the issue of introducing variability across observations for each predictor. 
 
-1. **Covariance Structure**: By using `mvrnorm`, one can specify a covariance matrix that describes the relationships between the predictors. This way, one can simulate data such that the values for each predictor are not only random but also correlated in a specific way. This is essential if the predictors are expected to have some degree of correlation (e.g., measurements that are physiologically linked).
+1. **Covariance Structure**: By using `mvrnorm`, one can specify a covariance matrix that describes the relationships between the predictors. This way, one can simulate data such that the values for each predictor are not only random but also correlated in a specific way. This is essential if the predictors are expected to have some degree of correlation (e.g., measurements that are physiologically linked). In our case, it is important that each feature is considered indipendent by any other.
 
-2. **Sampling**: Instead of setting the coefficients at the beginning and keeping them constant across all observations, `mvrnorm` allows one to sample a new set of coefficients for each observation based on the multivariate normal distribution. This means that for each observation, while the mean of the coefficients remains the same (as defined by the model), their actual values will differ due to the randomness introduced by the sampling process.
+1. **Sampling**: Instead of setting the coefficients at the beginning and keeping them constant across all observations, `mvrnorm` allows one to sample a new set of coefficients for each observation based on the multivariate normal distribution. This means that for each observation, while the mean of the coefficients remains the same (as defined by the model), their actual values will differ due to the randomness introduced by the sampling process.
 
-3. **Variability Across Observations**: The result is that each observation will have its own unique set of coefficients, leading to variability across observations for each predictor. This models the real-world scenario where different instances or subjects have similar but not identical characteristics.
+3. **Variability Across Observations**: It leads to variability across observations for each predictor. This models the real-world scenario where different instances or subjects have similar but not identical characteristics.
 
-In summary, using `MASS::mvrnorm` introduces the desired variability and correlation into the simulated data, making it more representative of real-world phenomena where predictors are not observed with identical values across different observations. The use of `mvrnorm` is particularly important when the predictors are expected to be correlated, which is common in many real-world data sets.
+### Strategy 2: Variable Mean Functions Across Observations
 
-#### Statistical Effect and Utility:
+In contrast to Strategy 1, this approach allows the mean function itself to vary for each observation. This is achieved by incorporating parameters into the mean functions that are specific to each observation.
 
-The simulated data reflects the complex interdependencies and temporal dynamics often present in real functional data. The sinusoidal means and structured covariance provide a realistic scenario where the data points are not independent but are influenced by both their position in time and their relation to other points.
+This strategy is suitable for scenarios where the mean behavior of the feature is expected to vary significantly among observations, capturing more complex and individual-specific patterns.
+The main implementation is inside the function `simulate_true_predictors_Ut`
 
-By simulating data with known properties, researchers can assess the accuracy and robustness of statistical methods in uncovering these properties from observed data.
+#### Mean Functions with Parameters
+The mean functions are defined with parameters that vary for each observation. For example:
 
-Simulating functional data is powerful for:
+```r
+mu_funcs <- list(
+  function(t, args) { cos(2 * pi * (t - args$a1)) + args$a2 },
+  function(t, args) { args$b1 * sin(pi * t) + args$b2 },
+  function(t, args) { args$c1 * t^3 + args$c2 * t^2 + args$c3 }
+  # Additional functions as needed
+)
+```
 
-- Testing Statistical Methods: Researchers and analysts can assess the performance of statistical methods under controlled conditions, understanding their behavior in response to known data-generating processes.
+The coefficients (`a1`, `a2`, `b1`, `b2`, etc.) are generated for each predictor and each observation, typically drawn from a normal or uniform distribution.
+For each observation and each predictor, the function applies the mean function with the specific coefficients, resulting in `a unique mean function for each observation`.
 
-- Model Validation: Before applying models to real-world data, which is often messy and complex, simulated data can help validate the models' assumptions and tuning parameters.
-
-- Educational Purposes: Simulated data can help students and practitioners learn about the characteristics of functional data and the appropriate analytical techniques.
-
-- Software Development: Developers of statistical software can use simulated datasets to test and benchmark their algorithms.
-
-#### Utility of Beta Functions in Simulation
-The use of `beta_funcs` is essential for simulating functional data in scenarios where the goal is to understand or predict a scalar outcome based on functional predictors. This is particularly useful for:
-
-- `Developing and Testing Functional Regression Models`: By simulating data with known beta_funcs, one can assess how well a functional regression model can recover these true effects from the data.
-
-- `Studying Variable Effects:` Researchers can simulate scenarios where the effect of a predictor varies over time or other dimensions, which is often the case in longitudinal studies or growth curve analysis.
-
-- `Understanding Interaction Effects`: In more complex simulations, beta_funcs can be used to model interaction effects between time-varying predictors and other covariates.
+Same definitions apply for the time domains, beta_funcs objects.
 
 
---- 
 
