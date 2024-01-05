@@ -5,6 +5,8 @@ library(fda)
 source(here("src", "R",  "generic_simulator",   "utils" , "covariance_utilities.R"))
 source(here("src", "R",  "generic_simulator",   "simulation" , "cov.R"))
 source(here("src", "R",  "generic_simulator",   "simulation" , "paper.R"))
+source(here("src", "R",  "generic_simulator",   "simulation" , "paper2.R"))
+source(here("src", "R",  "generic_simulator",   "simulation" , "robust.R"))
 
 
 
@@ -183,7 +185,6 @@ add_snr_noise <- function(Y, snr_linear = 5) {
   noise_sd <- sqrt(noise_power)
   # Generate noise
   Epsilon <- rnorm(length(Y), mean = 0, sd = noise_sd)
-
 
   return(Epsilon)
 }

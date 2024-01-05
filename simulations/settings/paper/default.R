@@ -6,7 +6,7 @@ true_predictors <- c(1, 1, 0, 1, 0, 0)
 predictors <- 6
 measurements <- 1000
 observations <- 250
-basis_functions <- 6
+basis_functions <- 4
 intercept <- 0
 norder <- 4
 noise_snr = c(100,100)
@@ -65,6 +65,8 @@ mu_funcs <- list(
   }
 )
 
+
+
 # time_domains <- list(
 #   list(0, 1),
 #   list(0, 1),
@@ -75,12 +77,12 @@ mu_funcs <- list(
 # )
 
 time_domains <- list(
-  list(0, 2),
-  list(0, 2 *pi / 3),
-  list(-1, 2 *1),
-  list(0,2 * pi / 3),
-  list(-2,2 * 1),
-  list(-1,2 * 1)
+  list(0, 1),
+  list(0, pi / 3),
+  list(-1, 1),
+  list(0, pi / 3),
+  list(-2, 1),
+  list(-1, 1)
 )
 # cov_funcs is null only in the paper simulation
 cov_funcs <- NULL

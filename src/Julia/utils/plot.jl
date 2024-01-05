@@ -25,7 +25,7 @@ function plot_combined_predicted_curve(beta_point_values::Any, γ_star::Any, bas
 
     # Calculate the number of rows for the layout based on the number of predictors
     n_rows = ceil(Int, predictors / 3)
-    p = plot(layout = grid(n_rows, 3))  # Define a grid layout with 3 plots per row
+    p = plot(layout = grid(n_rows, 3))
 
     for j in 1:predictors  # Loop over all curves
         curr_basis = basis_values[j,:,:]

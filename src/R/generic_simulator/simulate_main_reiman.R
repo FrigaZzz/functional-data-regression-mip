@@ -7,6 +7,42 @@ library(here)
 # Source utility files
 source(here("src","R", "generic_simulator", "config.R")) # sets the utility path
 
+
+# Function to compute the Z matrix
+compute_Z_matrix <- function(X, basis_values, time_domains) {
+  observations <- dim(X)[1]
+  predictors <- dim(X)[2]
+  num_basis <- dim(basis_values)[3]
+
+  # Initialize Z matrix with 3 dimensions
+  Z <- array(0, dim = c(observations, predictors, num_basis))
+
+  for (i in 1:observations) {
+    for (j in 1:predictors) {
+      # Retrieve the time domain for the j-th predictor
+      time <- time_domains[[j]]
+      
+      # Retrieve the X values for the i-th observation and j-th predictor
+      X_ij <- X[i, j, ]
+      
+      # Retrieve the basis values for the j-th predictor
+      basis_j <- basis_values[j, , ]
+      
+      # Compute the trapezoidal rule for each basis function
+      for (k in 1:num_basis) {
+        # Calculate the integral using the trapezoidal rule
+        Z[i, j, k] <- trapz(time, X_ij * basis_j[, k])
+      }
+    }
+  }
+
+  return(Z)
+}
+
+
+
+
+
 # Unified function
 generate_data <- function(
     predictors, observations, measurements, basis_functions, intercept = 0, norder, noise_snr, 
@@ -33,29 +69,41 @@ generate_data <- function(
   U <- data$U
   X <- data$X
   Y <- data$Y
-
+  beta_point_values <- create_beta_curves(beta_funcs, time_domains)
+  
   # Remaining processing steps
   basis_objs <- create_basis(basis_functions, time_domains, norder, predictors)
-  result <- smooth_betas_generic(beta_funcs, basis_functions, time_domains, basis_objs)
+  result <- smooth_betas_generic(beta_point_values, basis_functions, time_domains, basis_objs)
   Beta_matrix <- result$beta_matrix
   basis_values <- result$basis_values
-  beta_point_values <- result$beta_point_values
-  J <- compute_J_matrix_generic(basis_objs, predictors, basis_functions)
-  W <- compute_W_matrix_generic(X, basis_functions, time_domains, basis_objs)
-  Z_matrix <- compute_Z_matrix_generic(W, J, predictors, basis_functions)
+  # J <- compute_J_matrix_generic(basis_objs, predictors, basis_functions)
+  # W <- compute_W_matrix_generic(X, basis_functions, time_domains, basis_objs)
+  # Z_matrix <- compute_Z_matrix_generic(W, J, predictors, basis_functions)
+  # Example usage:
+  Z_matrix <- compute_Z_matrix(X, basis_values, time_domains)
+  W <- NULL
+  J <- NULL 
 
   list(W = W, Z = Z_matrix, Y = Y, J = J, B = Beta_matrix, U = U, X = X, basis_objs = basis_objs, basis_values = basis_values, beta_point_values = beta_point_values)
 }
 
-test = True
-if(test){
+# test = TRUE
+# source(here("simulations","settings", "3_predictors", "default.R")) # sets the utility path
+# time_domains = list(
+#   seq(0, 1, length.out = measurements),
+#   seq(0, pi / 3, length.out = measurements),
+#   seq(-1, 1, length.out = measurements)
+# )
+# data <- generate_data(predictors, observations,measurements, basis_functions, intercept, norder,noise_snr, mu_funcs, beta_funcs,  time_domains, cov_funcs,seed, simulation_type)
 
-  source(here("simulations","settings", "3_predictors", "default.R")) # sets the utility path
-  time_domains = list(
-    seq(0, 1, length.out = measurements),
-    seq(0, pi / 3, length.out = measurements),
-    seq(-1, 1, length.out = measurements)
-  )
-
-  data <- generate_data(predictors, observations,measurements, basis_functions, intercept, norder,noise_snr, mu_funcs, beta_funcs,  time_domains, cov_funcs,seed, simulation_type)
-}
+# # Assuming `data` is your data output variable
+# W = data$W
+# Z = data$Z
+# Y = data$Y
+# J = data$J
+# B = data$B
+# U = data$U
+# X = data$X
+# basis_objs = data$basis_objs
+# basis_values = data$basis_values
+# beta_dt = data$beta_dt

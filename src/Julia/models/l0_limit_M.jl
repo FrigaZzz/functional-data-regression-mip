@@ -1,4 +1,4 @@
-
+3
 using JuMP
 using Gurobi
 
@@ -9,19 +9,19 @@ function mip_functional_regression(Y, Z, lambda, lambda_group, BIG_M; intercept 
 
     # Create and configure the optimization model
     model = Model(optimizer_with_attributes(Gurobi.Optimizer, 
-        "TimeLimit" => 1800,  # Increased time limit to 30 minutes
-        "OutputFlag" => 1,    # Enable solver output
-        "Presolve" => 0,      # Enhanced presolving
-        "Heuristics" => 0,    # Enable heuristics for early feasible solutions
-        "MIPGap" => 0,        # Aim for the exact optimal solution
-        "Threads" => 0,       # Utilize all available threads
-        "MIPFocus" => 1,      # Focus on finding feasible solutions quickly
-        "NumericFocus" => 4,  # Enhanced numerical stability
-        "NonConvex" => 2,     # Allow non-convex optimization
-        "OptimalityTol" => 1e-6,  # Tighten optimality tolerance
-        "IntFeasTol" => 1e-6,     # Tighten integer feasibility tolerance
-        "FeasibilityTol" => 1e-6  # Tighten feasibility tolerance
-    ))
+    "TimeLimit" => 1800,  # Increased time limit to allow more thorough exploration
+    "OutputFlag" => 1,  # Enable solver output for insights during solving
+    "Presolve" => 2,  # Apply more presolving to simplify the model
+    "Heuristics" => 1,  # Enable heuristics for finding good feasible solutions early
+    "MIPGap" => 0.01,  # Set a smaller MIP gap for a closer optimal solution
+    "Threads" => 0,  # Use all available threads for parallel computation
+    "MIPFocus" => 1,  # Focus on finding feasible solutions quickly
+    "NumericFocus" => 3,  # Increase numerical stability focus
+    "NonConvex" => 2,  # Allow for non-convex optimization
+    "OptimalityTol" => 1e-5,  # Tighten the optimality tolerance
+    "IntFeasTol" => 1e-6,  # Tighten the integer feasibility tolerance
+    "FeasibilityTol" => 1e-6  # Tighten the feasibility tolerance
+   ))
 
     # Define variables for coefficients and binary indicators
     @variable(model, beta[1:p, 1:r])

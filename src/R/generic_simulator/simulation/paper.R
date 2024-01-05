@@ -38,8 +38,6 @@ simulate_true_predictors_Ut <- function(mu_funcs, observations, time_domains) {
   predictors = length(mu_funcs)
   measurements = length(time_domains[[1]])
   coef_list <- generate_coefficients(observations, coef_specs)
-
-
   X <- array(0, dim = c(observations, predictors, measurements))
   # Generate the functional data for each observation and each predictor
   for (i in 1:observations) {

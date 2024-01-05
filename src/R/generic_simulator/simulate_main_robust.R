@@ -10,10 +10,10 @@ source(here("src","R", "generic_simulator", "config.R")) # sets the utility path
 # Unified function
 generate_data <- function(
     predictors, observations, measurements, basis_functions, intercept = 0, norder, noise_snr, 
-    mu_funcs, beta_funcs, time_domains, cov_funcs = NULL, seed = 2000,
+    mu_funcs= NULL, beta_funcs = NULL, time_domains = NULL, cov_funcs = NULL, seed = 2000,
     simulation_type = "not paper") {
 
-  # set.seed(seed)
+  set.seed(seed)
   # debug print all input parameters
   print(paste("predictors:", predictors))
   print(paste("observations:", observations))
@@ -23,24 +23,17 @@ generate_data <- function(
   
 
   # Call the appropriate data generation function based on simulation type
-  if (simulation_type == "paper") {
-    data <- simulate_paper_data(mu_funcs, beta_funcs, observations, time_domains, intercept, predictors, noise_snr)
-   } else if (simulation_type == "paper2") {
-    data <- simulate_paper2_data( observations, time_domains,  predictors) 
-  } else if (simulation_type == "robust") {
   data = simulate_data_robust(predictors, observations, measurements) 
-
-  }else {
-    data <- simulate_cov_data(mu_funcs, cov_funcs, beta_funcs, observations, time_domains, intercept, predictors, noise_snr) 
-  }
 
   # Extract U, X, Y from the returned data
   U <- data$U
   X <- data$X
   Y <- data$Y
-  beta_point_values <- create_beta_curves(beta_funcs, time_domains)
+  # create beta values from each time domain
+  beta_point_values <- data$beta_values
+  time_domains <- rep(list(seq(0, 1, length.out = measurements)), predictors) # grid points of Xs
 
-  # Remaining processing steps
+  # # Remaining processing steps
   basis_objs <- create_basis(basis_functions, time_domains, norder, predictors)
   result <- smooth_betas_generic(beta_point_values, basis_functions, time_domains, basis_objs)
   Beta_matrix <- result$beta_matrix
@@ -51,4 +44,3 @@ generate_data <- function(
 
   list(W = W, Z = Z_matrix, Y = Y, J = J, B = Beta_matrix, U = U, X = X, basis_objs = basis_objs, basis_values = basis_values, beta_point_values = beta_point_values)
 }
-

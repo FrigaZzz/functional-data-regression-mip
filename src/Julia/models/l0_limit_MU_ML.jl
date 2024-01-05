@@ -38,8 +38,11 @@ function mip_functional_regression(Y, Z, lambda, lambda_group, BIG_MU, BIG_ML; i
     end
 
     # Assuming you have a vector 'weights' containing w_i for each observation
-    @objective(model, Min,1/n *sum((Y[i] - alpha - sum(Z[i, j, :]' * beta[j,:] for j in 1:p))^2 for i in 1:n) )
+    @objective(model, Min,1/n *sum((Y[i] - alpha - sum(Z[i, j, :]' * beta[j,:] for j in 1:p))^2 for i in 1:n)  +
+    lambda * sum(beta_nonzero[j, k] for j in 1:p, k in 1:r) +
+    lambda_group * sum(group[j] for j in 1:p))
 
+    
     for j in 1:p
         # Constraints to link the binary variables with the beta coefficients
         #if any coefficient in a group is nonzero, that group is selected

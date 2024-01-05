@@ -6,9 +6,9 @@ simulation_type = "non paper"
 beta_funcs <- list(
   function(t) cos(t),
   function(t) sin(t),
-  function(t) 0 * t
+  function(t)  t
 )
-true_predictors <- c(1,1,0)
+true_predictors <- c(1,1,1)
 
 predictors <- 3
 measurements <- 200
@@ -19,7 +19,7 @@ norder = 4
 noise_snr = c(100,100)
 seed = 1
 mu_funcs <- list(
-  function(t) sin(2 * pi * t),
+  function(t) - sin(2 * pi * t),
   function(t) 4 * t * (1 + cos(2 * pi * t)),
   function(t) 4 * t^2
 )
@@ -31,7 +31,7 @@ cov_funcs <- list(
 )
 
 time_domains = list(
-  list(0, 1),
-  list(0, pi / 3),
-  list(-1, 1)
+  list(0, pi/3 ),
+  list(0, 4* pi / 3),
+  list(-1,3)
 )
