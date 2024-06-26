@@ -17,6 +17,7 @@ simulate_data_robust_from_library <- function(n_pred, n_curve, n_gp) {
   }
 
   # Return a list containing the generated data
+  
   return(list(X = X, U = X, Y = Y, beta_values = beta_values))
 }
 

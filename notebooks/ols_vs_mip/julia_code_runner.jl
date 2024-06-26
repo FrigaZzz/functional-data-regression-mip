@@ -10,21 +10,21 @@ using Plots
 using Statistics
 
 # Include simulation code
-include(joinpath(project_root, "simulations", "simulation.jl"))
+include(joinpath(project_root, "src", "simulation.jl"))
 
 # Define simulation parameters
-simulation_name = "3_predictors"
+simulation_name = "paper"
 simulation_settings_file = "default"
 
-measurements = 100
-basis_functions = 6
+measurements = 50
+basis_functions = 4
 
 params_train = (
-    observations = 150,
+    observations = 300,
     measurements = measurements,
     basis_functions = basis_functions,
     noise_snr = [100,1000],
-    seed = 1
+    seed = 100
 )
 
 params_test = (
@@ -36,8 +36,8 @@ params_test = (
 )
 
 # Load simulation data
-output = load_simulation_data(simulation_name, simulation_settings_file, project_root; params_train...)
-output_test = load_simulation_data(simulation_name, simulation_settings_file, project_root; params_test...)
+output = load_simulation_reiman(simulation_name, simulation_settings_file, project_root; params_train...)
+output_test = load_simulation_reiman(simulation_name, simulation_settings_file, project_root; params_test...)
 
 # Extract outputs from the simulation
 predictors = Int(output[:predictors])
@@ -65,11 +65,11 @@ W_test = output_test[:W]
 beta_matrix_test  = output_test[:B]
 
 # Plot observed X and basis values
-plot(X[1,1,:], label="OBSERVED X", legend=:topleft)
-plot!(basis_values[1,:,:] * W[1, 1, :], label="W", legend=:topleft)
+# plot(X[1,1,:], label="OBSERVED X", legend=:topleft)
+# plot!(basis_values[1,:,:] * W[1, 1, :], label="W", legend=:topleft)
 
 # Include model file
-model_name = "simple_regressor"
+model_name = "l0"
 model_file_path = joinpath(project_root, "src", "Julia","ols_vs_mip_models", model_name *".jl")
 include(model_file_path)
 
@@ -78,8 +78,8 @@ beta_matrix_max_values = maximum(beta_matrix, dims = 2)
 beta_matrix_min_values = minimum(beta_matrix, dims = 2)
 
 # Set BigM values
-BigM = ones(predictors) .* 30000000   # or use beta_matrix_max_values
-BigM_ =  ones(predictors) .* -30000000  # or use beta_matrix_min_values
+BigM =ones(size(beta_matrix))  .* 30000000   # or use beta_matrix_max_values
+BigM_ =  ones(size(beta_matrix))  .* -30000000  # or use beta_matrix_min_values
 
 # Perform MIP functional regression
 to_predict = sum(true_predictors)
@@ -106,7 +106,7 @@ output_folder = joinpath(project_root, "outputs", "plots", simulation_name)
 
 # Plot combined predicted curve
 beta_point_values = output[:beta_point_values]
-plot_combined_predicted_curve(beta_point_values, beta_ols, basis_values, time_domains, output_folder, true)
+plot_combined_predicted_curve(beta_point_values, beta_star, basis_values, time_domains, output_folder, true)
 
 # Load data analysis utilities
 using LinearAlgebra
@@ -116,3 +116,7 @@ include(joinpath(project_root, "src", "Julia", "utils", "data_analysis.jl"))
 performance_metrics_real = compute_metrics(Y, Z, beta_matrix, beta_matrix, alpha_star, groups, predictors)
 performance_metrics_estimate = compute_metrics(Y, Z, beta_matrix, beta_star, alpha_star, groups, predictors)
 performance_metrics_ols = compute_metrics(Y, Z, beta_matrix, beta_ols, alpha_star, groups, predictors)
+
+# print(beta_matrix)
+# print(beta_star)
+# print(beta_ols)

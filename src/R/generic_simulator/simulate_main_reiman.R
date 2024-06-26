@@ -6,6 +6,10 @@ library(here)
 
 # Source utility files
 source(here("src","R", "generic_simulator", "config.R")) # sets the utility path
+source(here("src", "R",  "generic_simulator",   "simulation" , "cov.R"))
+source(here("src", "R",  "generic_simulator",   "simulation" , "paper.R"))
+source(here("src", "R",  "generic_simulator",   "simulation" , "paper2.R"))
+
 
 
 # Function to compute the Z matrix
@@ -58,12 +62,15 @@ generate_data <- function(
   print(paste("intercept:", intercept))
   
 
-  # Call the appropriate data generation function based on simulation type
+   # Call the appropriate data generation function based on simulation type
   if (simulation_type == "paper") {
     data <- simulate_paper_data(mu_funcs, beta_funcs, observations, time_domains, intercept, predictors, noise_snr)
-  } else{
+   } else if (simulation_type == "paper2") {
+    data <- simulate_paper2_data( observations, beta_funcs, time_domains,  predictors) 
+  }else {
     data <- simulate_cov_data(mu_funcs, cov_funcs, beta_funcs, observations, time_domains, intercept, predictors, noise_snr) 
   }
+
 
   # Extract U, X, Y from the returned data
   U <- data$U

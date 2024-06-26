@@ -1,0 +1,26 @@
+{
+  "0": [
+    {
+      "IQR": 0.3239706210499472,
+      "RMSE_Coefficients": 0.046494124004903485,
+      "ISE_Coefficients": 0.12970221401900053,
+      "MSE_Predictions": 9.820061128711949,
+      "R_squared": 0.9223472259914063,
+      "Adjusted_R_squared": 0.9221917626940005,
+      "MSE_Coefficients": 0.0021617035669833423,
+      "RMSE_Predictions": 3.1336976766612232
+    }
+  ],
+  "10": [
+    {
+      "IQR": 0.3207289274597901,
+      "RMSE_Coefficients": 0.04592025056108471,
+      "ISE_Coefficients": 0.126520164695568,
+      "MSE_Predictions": 9.820075092516875,
+      "R_squared": 0.9223471155717077,
+      "Adjusted_R_squared": 0.9221916520532382,
+      "MSE_Coefficients": 0.0021086694115928003,
+      "RMSE_Predictions": 3.1336999046681027
+    }
+  ]
+}

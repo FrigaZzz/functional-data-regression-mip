@@ -1,0 +1,63 @@
+{
+  "1": [
+    {
+      "RMSE_Coefficients": 1.1537651007720156,
+      "ISE_Coefficients": 27.95465206294864,
+      "MSE_Predictions": 3.499877097796008,
+      "R_squared": 0.5758884540979856,
+      "Adjusted_R_squared": 0.5693990238860536,
+      "MSE_Coefficients": 1.331173907759459,
+      "RMSE_Predictions": 1.8707958461029381
+    },
+    {
+      "RMSE_Coefficients": 1.2413734790120314,
+      "ISE_Coefficients": 32.36117040228312,
+      "MSE_Predictions": 3.39494990699953,
+      "R_squared": 0.5886034243247609,
+      "Adjusted_R_squared": 0.5823089289889587,
+      "MSE_Coefficients": 1.5410081143944343,
+      "RMSE_Predictions": 1.8425389838479755
+    }
+  ],
+  "10": [
+    {
+      "RMSE_Coefficients": 0.3498704631597132,
+      "ISE_Coefficients": 2.570596160823437,
+      "MSE_Predictions": 0.3499123989282333,
+      "R_squared": 0.9215109788495458,
+      "Adjusted_R_squared": 0.9203096890422068,
+      "MSE_Coefficients": 0.12240934099159223,
+      "RMSE_Predictions": 0.5915339372582382
+    },
+
+    {
+      "RMSE_Coefficients": 0.37625291767888086,
+      "ISE_Coefficients": 2.972891419299285,
+      "MSE_Predictions": 0.3393708425082886,
+      "R_squared": 0.9238755605200955,
+      "Adjusted_R_squared": 0.9227104740138034,
+      "MSE_Coefficients": 0.1415662580618707,
+      "RMSE_Predictions": 0.5825554415746956
+    }
+  ],
+  "100": [
+    {
+      "RMSE_Coefficients": 0.0307415,
+      "ISE_Coefficients": 0.0198458,
+      "MSE_Predictions": 0.0042182,
+      "R_squared": 0.998698,
+      "Adjusted_R_squared": 0.998657,
+      "MSE_Coefficients": 0.00094504,
+      "RMSE_Predictions": 0.0649477
+    },
+    {
+      "RMSE_Coefficients": 0.0295681,
+      "ISE_Coefficients": 0.0183598,
+      "MSE_Predictions": 0.00408223,
+      "R_squared": 0.99874,
+      "Adjusted_R_squared": 0.9987,
+      "MSE_Coefficients": 0.000874274,
+      "RMSE_Predictions": 0.0638923
+    }
+  ]
+}

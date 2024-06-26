@@ -19,7 +19,7 @@ library(here)
 #' b <- settings_env$b
 #' c <- settings_env$c
 load_simulation_settings <- function(setting_name, variant_name = NULL) {
-    default_path <- here("simulations", "settings", setting_name, "default.R")
+    default_path <- here("simulations_settings", setting_name, "default.R")
     variant_path <- NULL
 
     # Load the default settings
@@ -31,7 +31,7 @@ load_simulation_settings <- function(setting_name, variant_name = NULL) {
 
     # If a variant is specified, construct its path and source it
     if (!is.null(variant_name) && variant_name != "default") {
-        variant_path <- here("simulations", "settings", setting_name, "variants", paste0(variant_name, ".R"))
+        variant_path <- here("simulations_settings", setting_name, "variants", paste0(variant_name, ".R"))
         if (file.exists(variant_path)) {
             source(variant_path)
         } else {

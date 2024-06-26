@@ -12,10 +12,25 @@ Calculate the integrated squared error between two beta matrices.
 # Returns
 - `distance::Float64`: The integrated squared error between the two beta matrices.
 """
-function integrated_squared_error_beta(beta_matrix, beta_star)
-    sum((beta_matrix - beta_star) .^ 2)
-end
+# function integrated_squared_error_beta(beta_matrix, beta_star)
+#     println(beta_matrix, beta_star)
+#     return sum((beta_matrix - beta_star) .^ 2)
+# end
+function integrated_squared_error_beta(beta_matrix, beta_star, basis_values)
+    predictors = size(basis_values, 1)
+    total_error = 0.0
 
+    for j in 1:predictors  # Loop over all curves
+        curr_basis = basis_values[j,:,:]
+        combined_curve_matrix = curr_basis * beta_matrix[j, :]
+        combined_curve_star = curr_basis * beta_star[j, :]
+
+        # Compute the sum of the squared differences for the jth predictor
+        total_error += sum(abs.(combined_curve_matrix .- combined_curve_star) .^ 2)
+    end
+
+    return total_error
+end
 
 """
     calculate_robust_curve_distance_IQR(beta_matrix, beta_star, groups)

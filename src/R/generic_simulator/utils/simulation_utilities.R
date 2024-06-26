@@ -3,10 +3,6 @@ library(here)
 library(fda)
 
 source(here("src", "R",  "generic_simulator",   "utils" , "covariance_utilities.R"))
-source(here("src", "R",  "generic_simulator",   "simulation" , "cov.R"))
-source(here("src", "R",  "generic_simulator",   "simulation" , "paper.R"))
-source(here("src", "R",  "generic_simulator",   "simulation" , "paper2.R"))
-source(here("src", "R",  "generic_simulator",   "simulation" , "robust.R"))
 
 
 
@@ -23,6 +19,7 @@ create_beta_curves <- function(beta_funcs, time_domains) {
   Betas <- array(0, dim = c(predictors, length(time_domains[[1]])))
   for (j in 1:predictors) {
     Betas[j, ] <- beta_funcs[[j]](time_domains[[j]])
+
   }
   return(Betas)
 }
@@ -189,6 +186,88 @@ add_snr_noise <- function(Y, snr_linear = 5) {
   return(Epsilon)
 }
 
+#' Compute Signal-to-Noise Ratio
+#'
+#' This function computes the Signal-to-Noise Ratio (SNR) given the original signal `Y` and the modified signal `Y2`.
+#'
+#' @param Y Numeric vector representing the original signal.
+#' @param Y2 Numeric vector representing the modified signal.
+#'
+#' @return Returns the SNR of the modified signal `Y2` relative to the original signal `Y`.
+#'
+#' Compute Signal-to-Noise Ratio
+#'
+#' This function computes the Signal-to-Noise Ratio (SNR) given the original signal `Y` and the modified signal `Y2`.
+#'
+#' @param Y Numeric array representing the original signal.
+#' @param Y2 Numeric array representing the modified signal.
+#'
+#' @return Returns a vector containing the SNR for each predictor.
+#'
+compute_snr <- function(Y, Y2) {
+  if (length(dim(Y)) == 3 && length(dim(Y2)) == 3) {
+    snr_values <- compute_snr_3d(Y, Y2)
+  } else {
+    # Calculate the power of the signal
+    signal_power <- var(Y)
+  
+    # Calculate the power of the noise
+    noise_power <- var(Y2 - Y)
+  
+    # Calculate the Signal-to-Noise Ratio
+    snr_values <- signal_power / noise_power
+  }
+  
+  return(snr_values)
+}
+
+
+#' Compute Signal-to-Noise Ratio for 3D Arrays
+#'
+#' This function computes the Signal-to-Noise Ratio (SNR) given the original signal `Y` and the modified signal `Y2`.
+#'
+#' @param Y Numeric array representing the original signal.
+#' @param Y2 Numeric array representing the modified signal.
+#'
+#' @return Returns a vector containing the SNR for each predictor.
+#'
+compute_snr_3d <- function(Y, Y2) {
+  # Calculate the number of observations, predictors, and measurements
+  observations <- dim(Y)[1]
+  predictors <- dim(Y)[2]
+  measurements <- dim(Y)[3]
+  
+  # Initialize vector to store SNR for each predictor
+  snr_vector <- numeric(predictors)
+  
+  # Loop over each predictor
+  for (m in 1:predictors) {
+    # Initialize sum of signal power and noise power
+    signal_power_sum <- 0
+    noise_power_sum <- 0
+    
+    # Loop over each observation
+    for (i in 1:observations) {
+      # Calculate the signal power for this predictor and observation
+      signal_power_sum <- signal_power_sum + sum(Y[i, m, ]^2)
+      
+      # Calculate the noise power for this predictor and observation
+      noise_power_sum <- noise_power_sum + sum((Y2[i, m, ] - Y[i, m, ])^2)
+    }
+    
+    # Calculate the average signal power and noise power for this predictor
+    signal_power <- signal_power_sum / (observations * measurements)
+    noise_power <- noise_power_sum / (observations * measurements)
+    
+    # Calculate the SNR for this predictor
+    snr <- signal_power / noise_power
+    
+    # Store the SNR for this predictor
+    snr_vector[m] <- snr
+  }
+  
+  return(snr_vector)
+}
 
 
 #' Compute noise for a given set of observations
@@ -236,3 +315,20 @@ trapz <- function(x, y) {
 
     return(0.5*(p1-p2))
 }
+
+
+# Example data
+set.seed(123)  # for reproducibility
+observations <- 100
+predictors <- 3
+measurements <- 10
+
+# generate matrix 3d with zero
+X <- array(0, dim = c(observations, predictors, measurements))
+X2 <- array(0, dim = c(observations, predictors, measurements))
+
+X[,1,] <- 1
+X2[,1,] <- 1.1
+
+snr_values <- compute_snr_3d(X, X2)
+print(snr_values)

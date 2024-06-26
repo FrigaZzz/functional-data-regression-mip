@@ -1,0 +1,18 @@
+@startuml
+skinparam component {
+    BackgroundColor PaleGreen
+    BorderColor Black
+    ArrowColor Black
+    FontName Arial
+}
+
+component "Data Generation" as FD
+component "Functional Data Preprocessing" as FP
+component "MIP Functional Regression" as MIP
+component "Regression Coefficients" as RC
+
+FD --> FP : Raw functioanl data
+FP --> MIP: Smoothed and preprocessed data
+MIP --> RC: Optimization results
+
+@enduml

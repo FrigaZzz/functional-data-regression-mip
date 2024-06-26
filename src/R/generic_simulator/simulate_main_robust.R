@@ -6,6 +6,7 @@ library(here)
 
 # Source utility files
 source(here("src","R", "generic_simulator", "config.R")) # sets the utility path
+source(here("src", "R",  "generic_simulator",   "simulation" , "robust.R"))
 
 # Unified function
 generate_data <- function(

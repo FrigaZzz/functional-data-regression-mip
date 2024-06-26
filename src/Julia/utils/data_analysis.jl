@@ -64,12 +64,13 @@ Compute various evaluation metrics for a functional data regression model.
 - `CDF_Distance`: Cumulative Distribution Function distance between the true and predicted response variables.
 - `Area_Between_Curves`: Area between the true and predicted response variable curves.
 """
-function compute_metrics(Y_test, Z_coeff, beta_matrix, beta_star, alpha_star, groups, predictors)
+function compute_metrics(Y_test, Z_coeff, beta_matrix, beta_star, alpha_star, groups, predictors, basis_values)
     Y_pred = get_predictions(Z_coeff, beta_star, alpha_star)
 
     # Coefficient Evaluation
     mse_beta = mse_coefficients(beta_matrix, beta_star)
     rmse_beta = rmse_coefficients(beta_matrix, beta_star)
+    se_betas = se_coefficients(beta_matrix, beta_star, basis_values)
 
 
     # Model Prediction Evaluation
@@ -83,21 +84,24 @@ function compute_metrics(Y_test, Z_coeff, beta_matrix, beta_star, alpha_star, gr
     func_correlation = functional_correlation(Y_test, Y_pred)
     cdf_dist = cdf_distance(Y_test, Y_pred)
     area_between = area_between_curves(Y_test, Y_pred)
-    ise_beta = integrated_squared_error_beta(beta_matrix, beta_star)
+    ise_beta = integrated_squared_error_beta(beta_matrix, beta_star, basis_values)
     iqr = calculate_robust_curve_distance_IQR(beta_matrix, beta_star, groups)
+
 
     # Return a dictionary of metrics
     Dict(
         "MSE_Coefficients" => mse_beta,
         "RMSE_Coefficients" => rmse_beta,
         "ISE_Coefficients" => ise_beta,
+        "SE_Coefficients"=> se_betas,
         "MSE_Predictions" => mse_Y,
         "RMSE_Predictions" => rmse_Y,
         # "MAE_Predictions" => mae_Y,
         "R_squared" => r2,
         "Adjusted_R_squared" => adj_r2,
         # "Functional_Correlation" => func_correlation,
-        # "CDF_Distance" => cdf_dist,
-        # "Area_Between_Curves" => area_between
+        "CDF_Distance" => cdf_dist,
+        "Area_Between_Curves" => area_between,
+        "IQR" => iqr,
     )
 end

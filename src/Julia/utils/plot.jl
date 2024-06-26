@@ -1,13 +1,13 @@
 using Plots
 
 """
-    plot_combined_predicted_curve(γ_matrix, γ_star, basis_values, time_domains, folder_path, show_plot=false)
+    plot_combined_predicted_curve(beta_matrix, beta_star, basis_values, time_domains, folder_path, show_plot=false)
 
-Plot the combined predicted curve for γ_matrix and γ_star.
+Plot the combined predicted curve for beta_matrix and beta_star.
 
 # Arguments
-- `γ_matrix`: Coefficient matrix for the training data.
-- `γ_star`: Coefficient matrix for the test data.
+- `beta_matrix`: Coefficient matrix for the training data.
+- `beta_star`: Coefficient matrix for the test data.
 - `basis_values::Array`: Array of basis function values.
 - `time_domains::Array`: Array of time domains.
 - `folder_path::String`: Path to the folder where the plot will be saved.
@@ -17,11 +17,11 @@ Plot the combined predicted curve for γ_matrix and γ_star.
 - `nothing`
 
 """
-function plot_combined_predicted_curve(beta_point_values::Any, γ_star::Any, basis_values::Any, time_domains::Array, folder_path::Any, show_plot::Any=false;  upper_bound = nothing, lower_bound = nothing)
+function plot_combined_predicted_curve(beta_point_values::Any, beta_star::Any, basis_values::Any, time_domains::Array, folder_path::Any, show_plot::Any=false;  upper_bound = nothing, lower_bound = nothing, intercept = 0,only_real=false)
     mkpath(folder_path)  # Ensure the plots directory exists
     rm(folder_path, recursive=true)  # Clear the directory
     mkpath(folder_path)  # Recreate the directory
-    predictors = size(γ_star, 1)
+    predictors = size(beta_star, 1)
 
     # Calculate the number of rows for the layout based on the number of predictors
     n_rows = ceil(Int, predictors / 3)
@@ -30,18 +30,18 @@ function plot_combined_predicted_curve(beta_point_values::Any, γ_star::Any, bas
     for j in 1:predictors  # Loop over all curves
         curr_basis = basis_values[j,:,:]
         combined_curve_matrix = beta_point_values[j, :]
-        combined_curve_star = curr_basis * γ_star[j, :]
-        
+        combined_curve_star = curr_basis * beta_star[j, :] 
         # Standardized time domain for plotting
         real_time = time_domains[j, :] 
 
         # Define subplot index
         subplot_index = j
 
-        # Plot the combined predicted curve for γ_matrix and γ_star
-        plot!(p[subplot_index], real_time, combined_curve_matrix, label="γ_matrix", color=:blue)
-        plot!(p[subplot_index], real_time, combined_curve_star, label="γ_predicted", color=:red, linestyle=:dash)
-
+        # Plot the combined predicted curve for beta_matrix and beta_star
+        plot!(p[subplot_index], real_time, combined_curve_matrix, color=:blue, legend=false)
+        if !only_real
+            plot!(p[subplot_index], real_time, combined_curve_star,   color=:red, linestyle=:dash, legend=false)
+        end
         # Add the upper and lower bounds if they exist
         if !isnothing(upper_bound)
             plot!(p[subplot_index], real_time, curr_basis * upper_bound[j, :], label="Upper Bound", color=:green, linestyle=:dashdotdot)
@@ -58,7 +58,6 @@ function plot_combined_predicted_curve(beta_point_values::Any, γ_star::Any, bas
     # Save the plot to a file
     savefig(p, joinpath(folder_path, "combined.png"))
 end
-
 
 # Function to plot multiple observations for a single predictor
 function plot_predictor_observations(X, predictor, obs, plot_title)

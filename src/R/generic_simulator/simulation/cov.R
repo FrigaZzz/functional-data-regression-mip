@@ -13,19 +13,62 @@ simulate_cov_data <- function(mu_funcs, cov_funcs, beta_funcs, observations, tim
   X <- U
   # Add noise to Y (if specified)
   
-  # X <- X + add_snr_noise( X, noise_snr[1])
+  #X <- X + apply_snr_to_X_cov(  U  , noise_snr[1])
 
   # Compute Y values
-  Y <- compute_Y_values_with_func(U, Betas, observations, predictors, time_domains, intercept)$Y
+  Y_init <- compute_Y_values_with_func(X, Betas, observations, predictors, time_domains, intercept)$Y
 
   # Add noise to Y (if specified)
-  Y <- Y + add_snr_noise(Y, noise_snr[2])
+  
+  Y <- Y_init + add_snr_noise(Y_init, noise_snr[2])
 
+  # print(compute_snr(U, X))
+  # print(compute_snr(Y_init, Y))
 
-  return(list(U = NULL, X = X, Y = Y)) # U is not used in this simulation type
+  return(list(U = U, X = X, Y = Y)) # U is not used in this simulation type
+}
+
+apply_snr_to_X_cov <- function(X, snr_db = 100) {
+  # Determine the size of X
+  num_observations <- dim(X)[1]
+  num_predictors <- dim(X)[2]
+  num_time_points <- dim(X)[3]
+
+  # Iterate over each predictor
+  for (predictor in 1:num_predictors) {
+    for (time_point in 1:num_time_points) {
+      # Extract the measurements for this predictor across all observations at the given time point
+      measurements <- X[, predictor, time_point]
+
+      # Apply the SNR function to these measurements
+      measurements_noisy <- adjust_signal_variance(measurements, snr_db)
+
+      # Update the measurements in X
+      X[, predictor, time_point] <- X[, predictor, time_point] + measurements_noisy
+    }
+  }
+
+  return(X)
 }
 
 
+
+adjust_signal_variance <- function(data, desired_SNR_dB) {
+  # Calculate the variance of the data
+  data_variance <- var(data)
+  
+  # Calculate the noise variance based on the desired SNR
+  noise_variance <- data_variance / (10^(desired_SNR_dB / 10))
+  
+  # Calculate the adjusted signal variance
+  adjusted_signal_variance <- data_variance - noise_variance
+  
+  # Update the covariance function with the adjusted signal variance (sig2)
+  # This step depends on how your covariance function is implemented
+  
+  # Return the data with adjusted signal variance
+  return(data * sqrt(adjusted_signal_variance / data_variance))
+}
 
 
 

@@ -6,6 +6,9 @@ library(here)
 
 # Source utility files
 source(here("src","R", "generic_simulator", "config.R")) # sets the utility path
+source(here("src", "R",  "generic_simulator",   "simulation" , "cov.R"))
+source(here("src", "R",  "generic_simulator",   "simulation" , "paper.R"))
+source(here("src", "R",  "generic_simulator",   "simulation" , "paper2.R"))
 
 require(splines)
 require(grplasso)

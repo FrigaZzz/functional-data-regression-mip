@@ -1,25 +1,26 @@
 using JuMP, Gurobi
 
-function mip_functional_regression(Y, Z, lambda, lambda_group, BIG_M; intercept=false, group_limit=Inf)
+function mip_functional_regression(Y, Z,  A,B; intercept=false, group_limit=Inf)
+    BIG_M = 100000
+    lambda = 0.0001
     n, p, r = size(Z)
     group_limit = min(group_limit, p)
     # MIP parameters
-    MIPpresolve = 2
-    MIPheur = 0.5
-    MIPfocus = 1
-    maxtime = 60
-    MIPg = 0.05
-    threads = 1
-    out = 1
+    model = Model(optimizer_with_attributes(Gurobi.Optimizer, 
+    "TimeLimit" => 1800,  # Increased time limit to allow more thorough exploration
+    "OutputFlag" => 1,  # Enable solver output for insights during solving
+    "Presolve" => 2,  # Apply more presolving to simplify the model
+    "Heuristics" => 1,  # Enable heuristics for finding good feasible solutions early
+    "MIPGap" => 0.01,  # Set a smaller MIP gap for a closer optimal solution
+    "Threads" => 0,  # Use all available threads for parallel computation
+    "MIPFocus" => 1,  # Focus on finding feasible solutions quickly
+    "NumericFocus" => 3,  # Increase numerical stability focus
+    "NonConvex" => 2,  # Allow for non-convex optimization
+    "OptimalityTol" => 1e-7,  # Tighten the optimality tolerance
+    "IntFeasTol" => 1e-7,  # Tighten the integer feasibility tolerance
+    "FeasibilityTol" => 1e-7  # Tighten the feasibility tolerance
+   ))
 
-    # Create a model
-    model = Model(optimizer_with_attributes(Gurobi.Optimizer, "TimeLimit" => maxtime,
-        "OutputFlag" => out, "Presolve" => 2,
-        "Heuristics" => 0, "MIPGap" => 0.05,
-        "Threads" => 1, "MIPFocus" => 0,
-        "NumericFocus" => 1, "NonConvex" => 2,
-        "OptimalityTol" => 0.01, "IntFeasTol" => 1e-5,
-        "FeasibilityTol" => 1e-5))
 
     # Define variables
     @variable(model, beta[1:p, 1:r])
@@ -35,7 +36,7 @@ function mip_functional_regression(Y, Z, lambda, lambda_group, BIG_M; intercept=
     end
     # Set up the objective function
     @objective(model, Min, sum((Y[i] - alpha - sum(Z[i, j, :]' * beta[j, :] for j in 1:p))^2 for i in 1:n) + lambda * sum(t[j, k] for j in 1:p, k in 1:r)
-                           + lambda_group * sum(group[j] for j in 1:p)
+                          
     )
 
     # Constraints to link the group selection with the beta variables
@@ -50,12 +51,11 @@ function mip_functional_regression(Y, Z, lambda, lambda_group, BIG_M; intercept=
             @constraint(model, beta[j, k] <= t[j, k])
             @constraint(model, -beta[j, k] <= t[j, k])
         end
-        # Revised group selection constraint
-        @constraint(model, group[j] <= sum(beta_nonzero[j, k] for k in 1:r))
+
     end
 
     # Group limit constraint
-    @constraint(model, sum(group[j] for j in 1:p) <= group_limit)
+    @constraint(model, sum(group) == group_limit)
 
     # Solve the model
     optimize!(model)
