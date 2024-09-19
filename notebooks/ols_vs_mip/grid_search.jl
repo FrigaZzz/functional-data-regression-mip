@@ -10,6 +10,7 @@ using LinearAlgebra
 using Plots
 using Statistics
 using LinearAlgebra
+using Random
 include(joinpath(project_root, "src", "Julia", "utils", "data_analysis.jl"))
 # Include simulation code
 include(joinpath(project_root, "src", "simulation.jl"))

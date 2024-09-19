@@ -43,6 +43,15 @@
         return auc
     end
 
+    # Function to accumulate metrics
+    function accumulate_metrics(metrics_dict, cumulative_dict)
+        for (key, value) in metrics_dict
+            if typeof(value) == Float64
+                cumulative_dict[key] = get(cumulative_dict, key, 0.0) + value
+            end
+        end
+    end
+
     function compute_classification_scores_all_simulations(groups_list, true_predictors)
         recall_list, fpr_list, precision_list, f1_score_list, roc_auc_list = [], [], [], [], []
     
@@ -164,8 +173,8 @@
         beta_matrix_min_values = minimum(beta_matrix, dims = 2)
 
         # Set BigM values
-        BigM =ones(size(beta_matrix))  .* 30000000   # or use   beta_matrix_max_values
-        BigM_ =  ones(size(beta_matrix))  .* -30000000  # or use    beta_matrix_min_values
+        BigM =ones(size(beta_matrix))  .* 30000   # or use   beta_matrix_max_values
+        BigM_ =  ones(size(beta_matrix))  .* -30000  # or use    beta_matrix_min_values
 
         # Perform MIP functional regression
         to_predict = sum(true_predictors)
@@ -182,9 +191,9 @@
         print("Beta_star: ", beta_star)
     
     # Compute performance metrics for testing data
-    performance_metrics_real_test = compute_metrics(Y_test, Z_test, beta_matrix_test, beta_matrix, alpha_star, groups, predictors)
-    performance_metrics_estimate_test = compute_metrics(Y_test, Z_test, beta_matrix_test, beta_star, alpha_star, groups, predictors)
-    performance_metrics_ols_test = compute_metrics(Y_test, Z_test, beta_matrix_test, beta_ols, alpha_star, groups, predictors)
+    performance_metrics_real_test = compute_metrics(Y_test, Z_test, beta_matrix_test, beta_matrix, alpha_star, groups, predictors, basis_values)
+    performance_metrics_estimate_test = compute_metrics(Y_test, Z_test, beta_matrix_test, beta_star, alpha_star, groups, predictors, basis_values)
+    performance_metrics_ols_test = compute_metrics(Y_test, Z_test, beta_matrix_test, beta_ols, alpha_star, groups, predictors, basis_values)
 
     
 
@@ -204,17 +213,9 @@
     push!(groups_list, groups)
 
     #Accumulate performance metrics
-    for (key, value) in performance_metrics_real_test
-        cumulative_metrics_real[key] = get(cumulative_metrics_real, key, 0.0) + value
-    end
-
-    for (key, value) in performance_metrics_estimate_test
-        cumulative_metrics_estimate[key] = get(cumulative_metrics_estimate, key, 0.0) + value
-    end
-
-    for (key, value) in performance_metrics_ols_test
-        cumulative_metrics_ols[key] = get(cumulative_metrics_ols, key, 0.0) + value
-    end
+    accumulate_metrics(performance_metrics_real_test, cumulative_metrics_real)
+    accumulate_metrics(performance_metrics_estimate_test, cumulative_metrics_estimate)
+    accumulate_metrics(performance_metrics_ols_test, cumulative_metrics_ols)
 end
 
     # Average the cumulative performance metrics over all simulations

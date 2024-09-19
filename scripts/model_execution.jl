@@ -4,7 +4,7 @@
 # Modified run_model_and_save_outputs function
 function run_model_and_save_outputs(model_name, simulation_name, setting_name, observations, observations_test, measurements, basis_functions, noise_snr, seed, λ, λ_group, M)
     # Include model file
-    include(joinpath(project_root, "src", "Julia", "models", model_name * ".jl"))
+    include(joinpath(project_root, "src", "Julia", "ols_vs_mip_models", model_name * ".jl"))
 
     # write the rput macro to pass the variable to R
     train_data = load_simulation_data(simulation_name, setting_name, project_root; observations = observations, measurements = measurements, basis_functions = basis_functions, noise_snr = noise_snr, seed =seed)
@@ -12,6 +12,8 @@ function run_model_and_save_outputs(model_name, simulation_name, setting_name, o
     Y_train, intercept, Z_train, beta_matrix_train, predictors_train, true_predictors_train = (
         train_data[:Y], train_data[:intercept], train_data[:Z], train_data[:B], train_data[:predictors], train_data[:true_predictors]
     )
+
+    basis_values = train_data[:basis_values]
 
     test_data = load_simulation_data(simulation_name, setting_name, project_root; observations = observations_test, measurements = measurements, basis_functions = basis_functions, noise_snr = noise_snr, seed = seed + 1) 
 
@@ -28,12 +30,18 @@ function run_model_and_save_outputs(model_name, simulation_name, setting_name, o
 
     to_predict = sum(true_predictors_train)
     intercept = train_data[:intercept]
-    big_Ms = maximum(abs.(beta_matrix_train), dims=2)
 
-    beta_star, alpha, groups = mip_functional_regression(Y_train, Z_train, λ, λ_group, big_Ms; intercept = intercept != 0 , group_limit = to_predict)
+    BigM = ones(size(beta_matrix_train)) .*     100000   # or use beta_matrix_max_values
+    BigM_ =  ones(size(beta_matrix_train)) .*  - 100000  # or use beta_matrix_min_values
+
+    beta_star, alpha, groups = mip_functional_regression(Y_train, Z_train, BigM,BigM_; intercept = intercept != 0, group_limit= to_predict)
 
     # Compute Metrics and save to file
-    performance_metrics = compute_metrics(Y_test, Z_test, beta_matrix_train, beta_star, alpha, groups, to_predict)
+    performance_metrics = compute_metrics(Y_test, Z_test, beta_matrix_train, beta_star, alpha, groups, to_predict,basis_values)
+
+
+
+
     save_performance_evaluation(output_dir, performance_metrics)
 
     # Save model parameters
@@ -83,9 +91,9 @@ project_root = dirname(@__DIR__)
 include(joinpath(project_root, "setup", "init_env.jl"))
 
 set_R_lib_path(project_root)
-model_name = "l0_limit.jl"
-include(joinpath(project_root, "src", "Julia", "models", model_name))
-include(joinpath(project_root, "src", "Julia", "utils", "simulation.jl"))
+model_name = "l0.jl"
+include(joinpath(project_root, "src", "Julia", "ols_vs_mip_models", model_name))
+include(joinpath(project_root, "src",  "simulation.jl"))
 include(joinpath(project_root, "src", "Julia", "utils", "file_management.jl"))
 include(joinpath(project_root, "src", "Julia", "utils", "data_analysis.jl"))
 include(joinpath(project_root, "src", "Julia", "utils", "plot.jl"))
@@ -93,7 +101,7 @@ include(joinpath(project_root, "src", "Julia", "utils", "plot.jl"))
 
 if isempty(ARGS)
     # Predefined values
-    run_model_and_save_outputs("l0_limit", "3_predictors", "default", 2500, 500, 250, 6, [false,100], 1, 0.01, 0.001, 1000)
+    run_model_and_save_outputs("l0", "3_predictors", "default", 2500, 500, 250, 6, [false,100], 1, 0.01, 0.001, 1000)
 
 else
     # Values from command-line arguments

@@ -113,9 +113,9 @@ using LinearAlgebra
 include(joinpath(project_root, "src", "Julia", "utils", "data_analysis.jl"))
 
 # Compute performance metrics
-performance_metrics_real = compute_metrics(Y, Z, beta_matrix, beta_matrix, alpha_star, groups, predictors)
-performance_metrics_estimate = compute_metrics(Y, Z, beta_matrix, beta_star, alpha_star, groups, predictors)
-performance_metrics_ols = compute_metrics(Y, Z, beta_matrix, beta_ols, alpha_star, groups, predictors)
+performance_metrics_real = compute_metrics(Y, Z, beta_matrix, beta_matrix, alpha_star, groups, predictors, basis_values)
+performance_metrics_estimate = compute_metrics(Y, Z, beta_matrix, beta_star, alpha_star, groups, predictors, basis_values)
+performance_metrics_ols = compute_metrics(Y, Z, beta_matrix, beta_ols, alpha_star, groups, predictors, basis_values)
 
 # print(beta_matrix)
 # print(beta_star)

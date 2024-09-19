@@ -24,6 +24,7 @@ include(plot_file_path)
 model_name = "l0"
 model_file_path = joinpath(project_root, "src", "Julia",    "ols_vs_mip_models", model_name *".jl")
 include(model_file_path)
+
 # Define OLS solution function
 function ols_solution(Y, Z)
     Z_reshaped = reshape(Z, :, size(Z, 2) * size(Z, 3))
@@ -31,6 +32,15 @@ function ols_solution(Y, Z)
     beta_hat = (Z_with_intercept' * Z_with_intercept) \ (Z_with_intercept' * Y)
     beta_hat_matrix = reshape(beta_hat[2:end], size(Z, 2), size(Z, 3))
     return beta_hat_matrix
+end
+
+  # Function to accumulate metrics
+  function accumulate_metrics(metrics_dict, cumulative_dict)
+    for (key, value) in metrics_dict
+        if typeof(value) == Float64
+            cumulative_dict[key] = get(cumulative_dict, key, 0.0) + value
+        end
+    end
 end
 
 # Define simulation parameters
@@ -133,9 +143,9 @@ for i in 1:N_simulations
 
    
    # Compute performance metrics for testing data
-   performance_metrics_real_test = compute_metrics(Y_test, Z_test, beta_matrix_test, beta_matrix, alpha_star, groups, predictors)
-   performance_metrics_estimate_test = compute_metrics(Y_test, Z_test, beta_matrix_test, beta_star, alpha_star, groups, predictors)
-   performance_metrics_ols_test = compute_metrics(Y_test, Z_test, beta_matrix_test, beta_ols, alpha_star, groups, predictors)
+   performance_metrics_real_test = compute_metrics(Y_test, Z_test, beta_matrix_test, beta_matrix, alpha_star, groups, predictors, basis_values)
+   performance_metrics_estimate_test = compute_metrics(Y_test, Z_test, beta_matrix_test, beta_star, alpha_star, groups, predictors, basis_values)
+   performance_metrics_ols_test = compute_metrics(Y_test, Z_test, beta_matrix_test, beta_ols, alpha_star, groups, predictors, basis_values)
 
    
 
@@ -153,17 +163,9 @@ for i in 1:N_simulations
     end
 
    #Accumulate performance metrics
-   for (key, value) in performance_metrics_real_test
-    cumulative_metrics_real[key] = get(cumulative_metrics_real, key, 0.0) + value
-end
-
-   for (key, value) in performance_metrics_estimate_test
-       cumulative_metrics_estimate[key] = get(cumulative_metrics_estimate, key, 0.0) + value
-   end
-
-   for (key, value) in performance_metrics_ols_test
-       cumulative_metrics_ols[key] = get(cumulative_metrics_ols, key, 0.0) + value
-   end
+   accumulate_metrics(performance_metrics_real_test, cumulative_metrics_real)
+   accumulate_metrics(performance_metrics_estimate_test, cumulative_metrics_estimate)
+   accumulate_metrics(performance_metrics_ols_test, cumulative_metrics_ols)
 end
 
 # Average the cumulative performance metrics over all simulations

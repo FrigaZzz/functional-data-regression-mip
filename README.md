@@ -81,6 +81,23 @@ After completing these steps, you will have all the necessary packages installed
 You can either decide to install the required dependencies that are defined in the DESCRIPTION file or reproduce the whole environment, by 
 installing the RENV ENVIRONMENT.
 
+
+#### (Option A) Simple Install
+Install libraries:
+
+```R
+  install.packages(c("refund", "MASS", "fda", "here", "robflreg", "fda.usc"))
+```
+
+Check the installation:
+
+```R
+    library(fda)
+```
+
+
+#### (Option B) Renv installation
+
 1. **Open R**: Navigate to the project directory and open R.
 
 2. **Activate `renv`**: If `renv` is not already initialized for your project, do so by running:
@@ -105,6 +122,9 @@ installing the RENV ENVIRONMENT.
     library(fda)
     library(MASS)
     library(refund)
+    library(here)
+    library(robflreg)
+    library(fda.usc)
     ```
 
     If they load without error, it means the restoration process has been successful and the packages are installed.
